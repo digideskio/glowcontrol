@@ -1,0 +1,17 @@
+{
+    "name": "@APP_ID@",
+    "description": "description of GlowControl",
+    "architecture": "@CLICK_ARCH@",
+    "title": "@APP_NAME@",
+    "hooks": {
+        "glowcontrol": {
+            "apparmor": "glowcontrol.apparmor",
+            "desktop":  "glowcontrol.desktop"
+        }
+    },
+    "version": "0.1",
+    "maintainer": "Jonas G. Drange <jonas@drange.net>",
+    "framework" : "ubuntu-sdk-15.04"
+}
+
+

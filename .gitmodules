@@ -1,0 +1,3 @@
+[submodule "lib-lifx"]
+	path = lib/lib-lifx
+	url = git@github.com:codemaster/lib-lifx.git

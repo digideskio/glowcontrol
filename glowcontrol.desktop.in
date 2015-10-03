@@ -1,0 +1,11 @@
+[Desktop Entry]
+_Name=GlowControl
+Comment=An app for controlling LIFX® bulbs
+Exec=@EXEC@
+Icon=@ICON@
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true
+
+
+
