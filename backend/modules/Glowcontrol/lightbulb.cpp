@@ -1,13 +1,20 @@
+#include <QtDebug>
 #include "lightbulb.h"
 
-Lightbulb::Lightbulb(QObject *parent) :
-    QObject(parent) {
+Lightbulb::Lightbulb(QObject *parent, lifx::Header header) :
+    QObject(parent), header(header)
+{
+
 }
 
 Lightbulb::~Lightbulb() {}
 
 QString Lightbulb::label() {
     return m_label;
+}
+
+void Lightbulb::setMac(QString mac) {
+
 }
 
 void Lightbulb::setLabel(const QString &label) {
@@ -27,6 +34,8 @@ bool Lightbulb::power() {
 }
 
 void Lightbulb::setPower(bool power) {
+    qWarning() << label() << "power" << power;
+    Q_EMIT powerChanged(power);
     m_power = power;
 }
 

@@ -19,34 +19,50 @@ set(CMAKE_AUTOMOC ON)
 set(QT_IMPORTS_DIR "lib/${ARCH_TRIPLET}")
 
 set(APP_NAME          GlowControl)
-set(APP_ID            "glowcontrol.jonas-drange")
+set(APP_ID            "com.ubuntu.developer.jonas-drange")
 #set(GLOWCONTROL_DIR   "share/qml/GlowControl")
 set(MAIN_QML          "GlowControl.qml")
 set(ICON              "GlowControl.png")
 set(DESKTOP_FILE_NAME "glowcontrol.desktop")
 
+set(SHARE_DIR         "share/GlowControl")
+set(LOCALE_DIR        "${LOCALEDIR}")
+
+
+# Components PATH
+execute_process(
+    COMMAND dpkg-architecture -qDEB_HOST_MULTIARCH
+    OUTPUT_VARIABLE ARCH_TRIPLET
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 if(CLICK_MODE)
-    set(CMAKE_INSTALL_BINDIR /)
+    set(CMAKE_INSTALL_BINDIR bin)
     set(CMAKE_INSTALL_PREFIX /)
     STRING(REPLACE "/usr/" "/" QT_IMPORTS_DIR ${QT_IMPORTS_DIR})
-    set(GLOWCONTROL_APP_DIR "${CMAKE_INSTALL_DATADIR}/qml")
-    set(DATA_DIR /)
+else(CLICK_MODE)
+    set(SHARE_DIR /${SHARE_DIR})
+endif(CLICK_MODE)
+
+
+if(CLICK_MODE)
+    # set(GLOWCONTROL_APP_DIR "${CMAKE_INSTALL_DATADIR}/qml")
+    # set(DATA_DIR /)
     add_definitions(-DLIB_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-    set(EXEC "glowcontrol")
-        #set(DESKTOP_DIR ${DATA_DIR})
+    set(EXEC "${CMAKE_INSTALL_BINDIR}/glowcontrol")
+    #set(DESKTOP_DIR ${DATA_DIR})
 
     # This command figures out the target architecture for use in the manifest file
     execute_process(
-      COMMAND dpkg-architecture -qDEB_HOST_ARCH
-      OUTPUT_VARIABLE CLICK_ARCH
-      OUTPUT_STRIP_TRAILING_WHITESPACE
+        COMMAND dpkg-architecture -qDEB_HOST_ARCH
+        OUTPUT_VARIABLE CLICK_ARCH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     configure_file(manifest.json.in ${CMAKE_CURRENT_BINARY_DIR}/manifest.json)
 else(CLICK_MODE)
-    set(GLOWCONTROL_APP_DIR "${CMAKE_INSTALL_DATADIR}/glowcontrol")
-    set(DATA_DIR ${CMAKE_INSTALL_DATADIR}/${APP_NAME})
+    #set(GLOWCONTROL_APP_DIR "${CMAKE_INSTALL_DATADIR}/glowcontrol")
+    #set(DATA_DIR ${CMAKE_INSTALL_DATADIR}/${APP_NAME})
     add_definitions(-DLIB_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
     set(EXEC "${CMAKE_INSTALL_BINDIR}/glowcontrol")
         #set(ICON "${CMAKE_INSTALL_PREFIX}/${DATA_DIR}/${ICON}")
@@ -58,15 +74,11 @@ configure_file(${DESKTOP_FILE_NAME}.in ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FIL
 if(CLICK_MODE)
     #install(FILES manifest.json DESTINATION ${CMAKE_INSTALL_PREFIX})
     #install(DIRECTORY "app/graphics" DESTINATION ${DATA_DIR})
-    install(FILES "${CMAKE_PROJECT_NAME}.json" DESTINATION ${DATA_DIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${ICON} DESTINATION ${DATA_DIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/glowcontrol.apparmor DESTINATION ${DATA_DIR})
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/manifest.json
-            DESTINATION ${CMAKE_INSTALL_PREFIX})
-    install(
-        FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE_NAME}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}
-    )
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}.json DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${ICON} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/glowcontrol.apparmor DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/manifest.json DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
 else(CLICK_MODE)
     install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE_NAME}
@@ -74,21 +86,14 @@ else(CLICK_MODE)
     )
 endif(CLICK_MODE)
 
-# Components PATH
-execute_process(
-    COMMAND dpkg-architecture -qDEB_HOST_MULTIARCH
-    OUTPUT_VARIABLE ARCH_TRIPLET
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
 option(INSTALL_TESTS "Install the tests on make install" on)
 
 #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE_NAME}.in DESTINATION ${DESKTOP_DIR})
 
-install(DIRECTORY "app/graphics" DESTINATION ${DATA_DIR})
-install(DIRECTORY "app/qml" DESTINATION ${DATA_DIR})
-#install(FILES "glowcontrol.apparmor" DESTINATION ${DATA_DIR})
-install(FILES ${ICON} DESTINATION ${DATA_DIR})
+install(DIRECTORY "app/graphics" DESTINATION ${CMAKE_INSTALL_PREFIX}${SHARE_DIR})
+install(DIRECTORY "app/qml" DESTINATION ${CMAKE_INSTALL_PREFIX}${SHARE_DIR})
+# install(FILES "glowcontrol.apparmor" DESTINATION ${DATA_DIR})
+# install(FILES ${ICON} DESTINATION ${DATA_DIR})
 
 add_subdirectory(app)
 add_subdirectory(backend)

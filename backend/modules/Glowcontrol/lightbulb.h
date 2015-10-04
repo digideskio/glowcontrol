@@ -16,7 +16,7 @@ class Lightbulb : public QObject
     // Q_PROPERTY( QString mac READ mac NOTIFY macChanged )
     Q_PROPERTY( QString version READ version NOTIFY versionChanged )
 public:
-    explicit Lightbulb(QObject *parent = 0);
+    explicit Lightbulb(QObject *parent = 0, lifx::Header = {});
     ~Lightbulb();
 
     QString label();
@@ -31,8 +31,9 @@ public:
     QColor color();
     void setColor(const QColor &);
 
-    std::array<uint8_t, 8> mac;
-    void setMac(const std::array<uint8_t, 8> &);
+    lifx::Header header;
+
+    // void setMac(const std::array<uint8_t, 8> &);
 
     QString version();
     void setVersion(const uint32_t &, const uint32_t &, const uint32_t &);
@@ -41,12 +42,14 @@ public slots:
     void discover();
 
 private:
+    void setMac(QString mac);
+
     QString m_label;
     QString m_group;
     uint64_t m_group_updated_at;
     bool m_power;
     lifx::HSBK m_color;
-    // std::array<uint8_t, 8> m_mac_address;
+    QString m_smac;
 
     uint32_t m_vendor;
     uint32_t m_product;
@@ -67,7 +70,5 @@ signals:
 //     lifx::LifxClient m_client;
 //     BulbList m_found_bulbs;
 };
-
-Q_DECLARE_METATYPE(Lightbulb);
 
 #endif

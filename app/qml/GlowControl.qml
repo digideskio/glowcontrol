@@ -14,7 +14,7 @@ MainView {
     objectName: "mainView"
 
     // Note! applicationName needs to match the "name" field of the click manifest
-    applicationName: "glowcontrol.jonas-drange"
+    applicationName: "GlowControl"
 
     /*
      This property enables the application to change orientation
@@ -32,7 +32,7 @@ MainView {
         title: i18n.tr("LIFX for Ubuntu Tøtsj")
 
         GlowControl {
-            id: myType
+            id: glowcontrol
 
             // onDiscoveryEnded: {
             //     console.warn('discov end');
@@ -47,10 +47,23 @@ MainView {
             }
 
             Repeater {
-                model: myType.bulbs
+                model: glowcontrol.bulbs
 
                 ListItem.Standard {
-                    text: modelData
+                    text: modelData.label
+                    control: Button {
+                        property bool powered: modelData.power
+                        id: b
+                        iconName: 'system-shutdown'
+                        opacity: powered ? 1 : 0.5
+                        onClicked: modelData.power = !powered
+                        width: units.gu(5)
+                    }
+
+                    Connections {
+                        target: modelData
+                        onPowerChanged: b.powered = power
+                    }
                 }
             }
         }

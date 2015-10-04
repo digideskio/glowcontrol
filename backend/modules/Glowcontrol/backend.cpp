@@ -8,8 +8,9 @@ void BackendPlugin::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("Glowcontrol"));
 
-    qRegisterMetaType <BulbList>("BulbList");
     qmlRegisterType<GlowControl>(uri, 1, 0, "GlowControl");
+    // qmlRegisterType<Lightbulb>(uri, 1, 0, "Lightbulb");
+    qmlRegisterUncreatableType<Lightbulb,1>(uri, 1, 0, "Lightbulb","error message");
 }
 
 void BackendPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
