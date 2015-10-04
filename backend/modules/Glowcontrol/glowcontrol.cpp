@@ -49,13 +49,15 @@ void GlowControl::setListeners(Lightbulb * bulb) {
 }
 
 void GlowControl::bulbPowerChanged(const bool power) {
-    if (power) {
-        emit bulbRequest(QString("power-on"), qobject_cast<Lightbulb *>(QObject::sender())->header);
+    Lightbulb* bulb = qobject_cast<Lightbulb *>(QObject::sender());
+    if (power != bulb->power()) {
+        QVariant arg;
+        arg.setValue(power);
+        qWarning() << "heading power request";
+        emit bulbRequest(QString("power"), arg, bulb->header);
     } else {
-        emit bulbRequest(QString("power-off"), qobject_cast<Lightbulb *>(QObject::sender())->header);
+        qWarning() << "ignoring power request";
     }
-    qWarning() << "saw bulb power changed" << qobject_cast<Lightbulb *>(QObject::sender())->label() << power;
-    //emit bulbPowerRequest(power, qobject_cast<Lightbulb *>(QObject::sender())->header);
 }
 
 void GlowControl::handleDone(const lifx::Header &header) {
@@ -226,17 +228,17 @@ void BulbDiscoverer::discover() {
                     num_identified++;
                 }
             }
-            qDebug() << __func__ << num_identified << "/" << m_found_bulbs.size();
+            // qDebug() << __func__ << num_identified << "/" << m_found_bulbs.size();
 
             if (num_identified == m_found_bulbs.size()) {
                 //RunCommands(argc, argv);
-                qDebug() << "RunCommands";
+                qDebug() << "Found all.";
                 break;
             }
         }
         qDebug() << count;
-        if (count > 100000) {
-            qDebug() << "time is money, giving up discovery";
+        if (count > 2000) {
+            // qDebug() << "time is money, giving up discovery";
             break;
         }
         count++;
@@ -255,20 +257,23 @@ BulbWorker::BulbWorker(QObject *parent) :
     qDebug() << "Started worker" << 1400;
 }
 
-void BulbWorker::handleRequest(const QString &type, const lifx::Header &header) {
-    qWarning() << "handle request" << type;
+void BulbWorker::handleRequest(const QString &type, const QVariant &arg, const lifx::Header &header) {
+    qWarning() << "handle request" << type << arg;
+
     std::array<uint8_t, 8> mac_address;
     for (auto i : {0, 1, 2, 3, 4, 5, 6, 7}) {
         mac_address[i] = header.target[i];
     }
 
-    if (type == "power-off") {
-        qWarning() << "powering off";
-        m_client.Send<lifx::message::device::SetPower>(mac_address.data());
-    } else if (type == "power-on") {
-        qWarning() << "powering on";
-        lifx::message::device::SetPower powerMsg{ 65535 };
-        m_client.Send<lifx::message::device::SetPower>(powerMsg, mac_address.data());
+    if (type == "power") {
+        bool power = arg.toBool();
+        qWarning() << "powering" << (power ? "up" : "down");
+        if (power) {
+            lifx::message::device::SetPower powerMsg{ 65535 };
+            m_client.Send<lifx::message::device::SetPower>(powerMsg, mac_address.data());
+        } else {
+            m_client.Send<lifx::message::device::SetPower>(mac_address.data());
+        }
     }
 
     while (m_client.WaitingToSend())

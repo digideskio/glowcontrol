@@ -36,7 +36,7 @@ Q_SIGNALS:
     void discoveryEnded();
     void bulbsChanged();
     void bulbPowerRequest(const bool, const lifx::Header &header);
-    void bulbRequest(const QString &type, const lifx::Header &header);
+    void bulbRequest(const QString &type, const QVariant &arg, const lifx::Header &header);
 
 public slots:
     void handleBulb(const QString &label, const bool, const lifx::Header &header);
@@ -81,9 +81,10 @@ public:
     explicit BulbWorker(QObject *parent = 0);
     ~BulbWorker();
 public slots:
-    void handleRequest(const QString &type, const lifx::Header &header);
+    void handleRequest(const QString &type, const QVariant &arg, const lifx::Header &header);
 signals:
     void done(const lifx::Header &header);
+    void fail(const lifx::Header &header);
 private:
     lifx::LifxClient m_client;
 };
