@@ -86,12 +86,25 @@ else(CLICK_MODE)
     )
 endif(CLICK_MODE)
 
+QT5_ADD_RESOURCES(glowcontrol-resources "app/ui.qrc")
+
+add_executable(glowcontrol "app/main.cpp" ${glowcontrol-resources})
+qt5_use_modules(glowcontrol Widgets Core Gui Quick Qml)
+target_link_libraries(glowcontrol Glowcontrolbackend)
+
+#install(FILES ${QML_JS_FILES} DESTINATION ${GLOWCONTROL_DIR})
+install(TARGETS glowcontrol RUNTIME DESTINATION bin)
+
+
+
+
 option(INSTALL_TESTS "Install the tests on make install" on)
 
 #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE_NAME}.in DESTINATION ${DESKTOP_DIR})
 
 install(DIRECTORY "app/graphics" DESTINATION ${CMAKE_INSTALL_PREFIX}${SHARE_DIR})
 install(DIRECTORY "app/qml" DESTINATION ${CMAKE_INSTALL_PREFIX}${SHARE_DIR})
+# install(FILES "app/ui.qrc" DESTINATION ${CMAKE_INSTALL_PREFIX}${SHARE_DIR})
 # install(FILES "glowcontrol.apparmor" DESTINATION ${DATA_DIR})
 # install(FILES ${ICON} DESTINATION ${DATA_DIR})
 
