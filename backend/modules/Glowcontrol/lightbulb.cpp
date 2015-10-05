@@ -34,17 +34,26 @@ bool Lightbulb::power() {
 }
 
 void Lightbulb::setPower(bool power) {
-    qWarning() << label() << "power" << power;
     Q_EMIT powerChanged(power);
     m_power = power;
 }
 
 QColor Lightbulb::color() {
-    return QColor();
+    return m_color;
 }
 
 void Lightbulb::setColor(const QColor &color) {
-    //
+    m_color = color;
+    Q_EMIT colorChanged(color);
+}
+
+int Lightbulb::brightness() {
+    return m_brightness;
+}
+
+void Lightbulb::setBrightness(const int &brightness) {
+    Q_EMIT brightnessChanged(brightness);
+    m_brightness = brightness;
 }
 
 // std::array<uint8_t, 8> Lightbulb::mac() {

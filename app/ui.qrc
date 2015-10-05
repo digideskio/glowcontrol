@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>qml/GlowControl.qml</file>
+    <file>qml/BulbControl.qml</file>
 </qresource>
 </RCC>

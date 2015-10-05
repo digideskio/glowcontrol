@@ -16,7 +16,6 @@ include(GNUInstallDirs)
 
 # Automatically create moc files
 set(CMAKE_AUTOMOC ON)
-set(QT_IMPORTS_DIR "lib/${ARCH_TRIPLET}")
 
 set(APP_NAME          GlowControl)
 set(APP_ID            "com.ubuntu.developer.jonas-drange")
@@ -25,6 +24,7 @@ set(MAIN_QML          "GlowControl.qml")
 set(ICON              "GlowControl.png")
 set(DESKTOP_FILE_NAME "glowcontrol.desktop")
 
+set(LIB_DIR           "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 set(SHARE_DIR         "share/GlowControl")
 set(LOCALE_DIR        "${LOCALEDIR}")
 
@@ -35,41 +35,28 @@ execute_process(
     OUTPUT_VARIABLE ARCH_TRIPLET
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-add_definitions(-DLIB_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-set(QT_IMPORTS_DIR "${CMAKE_INSTALL_LIBDIR}/${ARCH_TRIPLET}")
 
 if(CLICK_MODE)
     set(CMAKE_INSTALL_BINDIR bin)
     set(CMAKE_INSTALL_PREFIX /)
-    # STRING(REPLACE "/usr/" "/" QT_IMPORTS_DIR ${QT_IMPORTS_DIR})
-else(CLICK_MODE)
-    set(SHARE_DIR /${SHARE_DIR})
-endif(CLICK_MODE)
-
-
-if(CLICK_MODE)
-    # set(GLOWCONTROL_APP_DIR "${CMAKE_INSTALL_DATADIR}/qml")
-    # set(DATA_DIR /)
+    set(QT_IMPORTS_DIR "${CMAKE_INSTALL_LIBDIR}/${ARCH_TRIPLET}")
     set(EXEC "${CMAKE_INSTALL_BINDIR}/glowcontrol")
-    #set(DESKTOP_DIR ${DATA_DIR})
-
-    # This command figures out the target architecture for use in the manifest file
     execute_process(
         COMMAND dpkg-architecture -qDEB_HOST_ARCH
         OUTPUT_VARIABLE CLICK_ARCH
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-
-    configure_file(manifest.json.in ${CMAKE_CURRENT_BINARY_DIR}/manifest.json)
 else(CLICK_MODE)
-    #set(GLOWCONTROL_APP_DIR "${CMAKE_INSTALL_DATADIR}/glowcontrol")
-    #set(DATA_DIR ${CMAKE_INSTALL_DATADIR}/${APP_NAME})
-    add_definitions(-DLIB_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+    set(QT_IMPORTS_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+    set(SHARE_DIR /${SHARE_DIR})
+
+    # XXX: This might not work.
     set(EXEC "${CMAKE_INSTALL_BINDIR}/glowcontrol")
-        #set(ICON "${CMAKE_INSTALL_PREFIX}/${DATA_DIR}/${ICON}")
-        #set(DESKTOP_DIR ${CMAKE_INSTALL_DATADIR}/applications)
 endif(CLICK_MODE)
 
+add_definitions(-DLIB_DIR="${QT_IMPORTS_DIR}")
+
+configure_file(manifest.json.in ${CMAKE_CURRENT_BINARY_DIR}/manifest.json)
 configure_file(${DESKTOP_FILE_NAME}.in ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE_NAME}.in)
 
 if(CLICK_MODE)
@@ -87,16 +74,12 @@ else(CLICK_MODE)
     )
 endif(CLICK_MODE)
 
+# TODO: Move this part into backend
 QT5_ADD_RESOURCES(glowcontrol-resources "app/ui.qrc")
-
 add_executable(glowcontrol "app/main.cpp" ${glowcontrol-resources})
 qt5_use_modules(glowcontrol Widgets Core Gui Quick Qml)
 target_link_libraries(glowcontrol Glowcontrolbackend)
-
-#install(FILES ${QML_JS_FILES} DESTINATION ${GLOWCONTROL_DIR})
 install(TARGETS glowcontrol RUNTIME DESTINATION bin)
-
-
 
 
 option(INSTALL_TESTS "Install the tests on make install" on)
@@ -111,21 +94,20 @@ install(DIRECTORY "app/qml" DESTINATION ${CMAKE_INSTALL_PREFIX}${SHARE_DIR})
 
 add_subdirectory(app)
 add_subdirectory(backend)
-#add_subdirectory(lib)
 add_subdirectory(po)
 
-add_custom_target("autopilot" chmod +x ${CMAKE_SOURCE_DIR}/app/tests/autopilot/run
-                    COMMAND ${CMAKE_SOURCE_DIR}/app/tests/autopilot/run
-                    DEPENDS GlowControlbackend GlowControlbackend-qmldir
-                    WORKING_DIRECTORY ./app)
+# add_custom_target("autopilot" chmod +x ${CMAKE_SOURCE_DIR}/app/tests/autopilot/run
+#                     COMMAND ${CMAKE_SOURCE_DIR}/app/tests/autopilot/run
+#                     DEPENDS GlowControlbackend GlowControlbackend-qmldir
+#                     WORKING_DIRECTORY ./app)
 
-add_custom_target("check" /usr/bin/qmltestrunner -input ${CMAKE_SOURCE_DIR}/app/tests/unit -import ${CMAKE_BINARY_DIR}/backend
-                    DEPENDS GlowControlbackend GlowControlbackend-qmldir
-                    WORKING_DIRECTORY ./app)
+# add_custom_target("check" /usr/bin/qmltestrunner -input ${CMAKE_SOURCE_DIR}/app/tests/unit -import ${CMAKE_BINARY_DIR}/backend
+#                     DEPENDS GlowControlbackend GlowControlbackend-qmldir
+#                     WORKING_DIRECTORY ./app)
 
-add_custom_target("run" /usr/bin/qmlscene -I ${CMAKE_BINARY_DIR}/backend  ${CMAKE_SOURCE_DIR}/app/GlowControl.qml
-                    DEPENDS GlowControlbackend GlowControlbackend-qmldir
-                    WORKING_DIRECTORY ./app)
+# add_custom_target("run" /usr/bin/qmlscene -I ${CMAKE_BINARY_DIR}/backend  ${CMAKE_SOURCE_DIR}/app/GlowControl.qml
+#                     DEPENDS GlowControlbackend GlowControlbackend-qmldir
+#                     WORKING_DIRECTORY ./app)
 
 # No op custom target for all not compiled files, so they show up in the QtCreator project tree
 add_custom_target("glowcontrol_ClickFiles" ALL SOURCES "glowcontrol.apparmor" "manifest.json.in")

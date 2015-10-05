@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import Ubuntu.Components 1.1
+import Ubuntu.Components 1.2
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import Glowcontrol 1.0
 
@@ -22,13 +22,11 @@ MainView {
     */
     //automaticOrientation: true
 
-    // Removes the old toolbar and enables new features of the new header.
-    useDeprecatedToolbar: false
-
     width: units.gu(100)
     height: units.gu(76)
 
     Page {
+        id: root
         title: i18n.tr("LIFX for Ubuntu Tøtsj")
 
         GlowControl {
@@ -40,32 +38,94 @@ MainView {
             // }
         }
 
-        Column {
+        Flickable {
+            id: flickster
+            anchors.fill: parent
+            contentHeight: contentItem.childrenRect.height
+            boundsBehavior: Flickable.DragAndOvershootBounds
 
-            anchors {
-                fill: parent
-            }
 
-            Repeater {
-                model: glowcontrol.bulbs
 
-                ListItem.Standard {
-                    text: modelData.label
-                    control: Button {
-                        property bool powered: modelData.power
-                        id: b
-                        iconName: 'system-shutdown'
-                        opacity: powered ? 1 : 0.5
-                        onClicked: modelData.power = !powered
-                        width: units.gu(5)
+            Column {
+                id: contentItem
+                spacing: units.gu(2)
+
+                Repeater {
+                    id: dang
+                    model: glowcontrol.bulbs
+                    width: root.width
+
+                    BulbControl {
+                        bulb: modelData
+                        height: units.gu(10)
+                        width: root.width
                     }
 
-                    Connections {
-                        target: modelData
-                        onPowerChanged: b.powered = power
-                    }
+                    // ListItem.Standard {
+                    //     text: modelData.label + (modelData.color)
+                    //     control: Button {
+                    //         id: b
+                    //         iconName: 'system-shutdown'
+                    //         opacity: powered ? 1 : 0.5
+                    //         onClicked: modelData.power = !powered
+                    //         width: units.gu(5)
+                    //     }
+
+                    // }
                 }
+
             }
+
+            // boundsBehavior: (contentHeight > root.height) ?
+            //                  Flickable.DragAndOvershootBounds :
+            //                  Flickable.StopAtBounds
+            // flickableDirection: Flickable.VerticalFlick
+
+            // Grid {
+            //     id: grid
+            //     columns: 2
+            //     spacing: 2
+
+            //     anchors {
+            //         left: parent.left
+            //         right: parent.right
+            //     }
+
+            //     Repeater {
+            //         model: glowcontrol.bulbs
+
+            //         Rectangle {
+            //             id: rect
+            //             property bool powered: modelData.power
+            //             height: units.gu(20)
+            //             width: grid.width / grid.columns
+
+            //             color: modelData.color
+            //             opacity: powered ? 1 : 0.5
+
+            //             Label {
+            //                 anchors.fill: parent
+            //                 text: modelData.label
+            //             }
+
+            //             Connections {
+            //                 target: modelData
+            //                 onPowerChanged: rect.powered = power
+            //             }
+            //         }
+            //         // ListItem.Standard {
+            //         //     text: modelData.label + (modelData.color)
+            //         //     control: Button {
+            //         //         id: b
+            //         //         iconName: 'system-shutdown'
+            //         //         opacity: powered ? 1 : 0.5
+            //         //         onClicked: modelData.power = !powered
+            //         //         width: units.gu(5)
+            //         //     }
+
+            //         // }
+            //     }
+            // }
         }
     }
 }

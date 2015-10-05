@@ -6,6 +6,8 @@
 
 #include <lib-lifx/lifx.h>
 
+// TODO: Proper signatures with variable names.
+
 class Lightbulb : public QObject
 {
     Q_OBJECT
@@ -13,6 +15,7 @@ class Lightbulb : public QObject
     Q_PROPERTY( QString group READ group WRITE setGroup NOTIFY groupChanged )
     Q_PROPERTY( bool power READ power WRITE setPower NOTIFY powerChanged )
     Q_PROPERTY( QColor color READ color WRITE setColor NOTIFY colorChanged )
+    Q_PROPERTY( int brightness READ brightness WRITE setBrightness NOTIFY brightnessChanged )
     // Q_PROPERTY( QString mac READ mac NOTIFY macChanged )
     Q_PROPERTY( QString version READ version NOTIFY versionChanged )
 public:
@@ -31,6 +34,9 @@ public:
     QColor color();
     void setColor(const QColor &);
 
+    int brightness();
+    void setBrightness(const int &brightness);
+
     lifx::Header header;
 
     // void setMac(const std::array<uint8_t, 8> &);
@@ -48,7 +54,8 @@ private:
     QString m_group;
     uint64_t m_group_updated_at;
     bool m_power;
-    lifx::HSBK m_color;
+    QColor m_color;
+    int m_brightness;
     QString m_smac;
 
     uint32_t m_vendor;
@@ -63,6 +70,7 @@ signals:
     void groupChanged(const QString &group);
     void powerChanged(const bool power);
     void colorChanged(const QColor &color);
+    void brightnessChanged(const int &brightness);
     void versionChanged(const QString &version);
 // private:
 //     static uint64_t MacToNum(const uint8_t address[8]);
