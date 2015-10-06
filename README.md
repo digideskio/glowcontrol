@@ -1,6 +1,6 @@
-# glowcontrol
+# GlowControl for LIFX®
 
-A super simple Ubuntu Touch app for Lifx®.
+GlowControl is a super simple Ubuntu Touch app for Lifx®.
 
 ## Installation
 
