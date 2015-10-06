@@ -22,18 +22,20 @@ std::unordered_map<std::string, lifx::HSBK> colors =
 };
 
 GlowControl::GlowControl(QObject *parent) :
-        QObject(parent)
+        QObject(parent),
+        m_discovering(false)
 {
     qRegisterMetaType<lifx::Header>("lifx::Header");
 
     // Discoverer will do discovery at startup and when refresh is clicked.
     BulbDiscoverer *discoverer = new BulbDiscoverer();
     discoverer->moveToThread(&discovererThread);
-    connect(&discovererThread, &QThread::finished, discoverer, &QObject::deleteLater);
-    connect(this, &GlowControl::discover, discoverer, &BulbDiscoverer::discover);
+    // connect(&discovererThread, &QThread::finished, discoverer, &QObject::deleteLater);
+    connect(this, &GlowControl::discoverRequest, discoverer, &BulbDiscoverer::discover);
     connect(discoverer, &BulbDiscoverer::bulbReady, this, &GlowControl::handleBulb);
+    connect(discoverer, &BulbDiscoverer::done, this, &GlowControl::handleDiscoveryEnded);
     discovererThread.start();
-    emit discover();
+    discover();
 
     // Worker is our worker, it does talking to bulbs etc.
     BulbWorker *worker = new BulbWorker();
@@ -47,6 +49,28 @@ void GlowControl::setListeners(Lightbulb * bulb) {
     connect(bulb, &Lightbulb::powerChanged, this, &GlowControl::bulbPowerChanged);
     connect(bulb, &Lightbulb::colorChanged, this, &GlowControl::bulbColorChanged);
     connect(bulb, &Lightbulb::brightnessChanged, this, &GlowControl::bulbBrightnessChanged);
+}
+
+bool GlowControl::discover() {
+    qWarning() << "GlowControl" << __func__ << "discover";
+    if (m_discovering) {
+        return false;
+    } else {
+        m_discovering = true;
+        emit discoveringChanged(m_discovering);
+        emit discoverRequest();
+        return true;
+    }
+}
+
+bool GlowControl::discovering() {
+    return m_discovering;
+}
+
+void GlowControl::handleDiscoveryEnded(const bool success) {
+    qWarning() << "handleDiscoveryEnded";
+    m_discovering = false;
+    emit discoveringChanged(m_discovering);
 }
 
 void GlowControl::bulbPowerChanged(const bool power) {
@@ -162,7 +186,7 @@ void BulbDiscoverer::handlePowerRequest(const bool, const lifx::Header &header) 
 
 void BulbDiscoverer::discover() {
 
-    qDebug() << __func__ << "discover";
+    qDebug() << "BulbDiscoverer" << __func__ << "discover";
 
     m_client.RegisterCallback<lifx::message::device::StateService>(
         [this](const lifx::Header& header, const lifx::message::device::StateService& msg) {
@@ -259,15 +283,17 @@ void BulbDiscoverer::discover() {
             }
         }
         // qDebug() << count;
-        if (count > 10000) {
+        if (count > 15000) {
             qDebug() << "time is money, giving up discovery";
             break;
         }
         count++;
         QThread::sleep(0.05);
     }
-    qDebug() << __func__ << "Ending search";
-    // emit resultReady(m_found_bulbs);
+    qDebug() << "BulbDiscoverer" << __func__ << "Ending search";
+    m_found_bulbs.clear();
+    m_name_to_header.clear();
+    emit done(true);
 }
 
 BulbDiscoverer::~BulbDiscoverer() {}
@@ -318,14 +344,12 @@ void BulbWorker::handleRequest(const QString &type, const QVariant &arg, const l
     //   uint32_t duration;
     // };
 
-
         lifx::message::light::SetColor colorMsg {};
         colorMsg.color.brightness = brightness;
         m_client.Send<lifx::message::light::SetColor>(colorMsg, mac_address.data());
     }
 
-    while (m_client.WaitingToSend())
-    {
+    while (m_client.WaitingToSend()) {
         m_client.RunOnce();
     }
 

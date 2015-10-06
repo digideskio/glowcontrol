@@ -14,6 +14,7 @@ class GlowControl : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<Lightbulb> bulbs READ getLightbulbList NOTIFY bulbsChanged)
+    Q_PROPERTY(bool discovering READ discovering NOTIFY discoveringChanged)
     QThread discovererThread;
     QThread workerThread;
 public:
@@ -31,13 +32,19 @@ public:
       GlowControl *m = qobject_cast<GlowControl *>(property->object);
       return m->m_bulbs[index];
    }
+   bool discovering();
+
+   Q_INVOKABLE bool discover();
 
 Q_SIGNALS:
-    void discoveryEnded();
+    void discoveringChanged(const bool);
+    void discoverRequest();
+    void discoveryDone();
     void bulbsChanged();
     void bulbRequest(const QString &type, const QVariant &arg, const lifx::Header &header);
 
 public slots:
+    void handleDiscoveryEnded(const bool success);
     void handleBulb(const QString &label, const bool power, const QColor &color, const lifx::Header &header);
     void handleDone(const lifx::Header &header);
 
@@ -52,9 +59,7 @@ private:
     void setListeners(Lightbulb * bulb);
     QMap<QString, Lightbulb *> m_name_to_bulb;
     QList<Lightbulb *> m_bulbs;
-
-signals:
-    void discover();
+    bool m_discovering;
 };
 
 class BulbDiscoverer : public QObject
@@ -68,7 +73,7 @@ public slots:
     void handlePowerRequest(const bool, const lifx::Header &header);
 signals:
     void bulbReady(const QString &label, const bool power, const QColor &color, const lifx::Header &header);
-    // void resultReady(const BulbMap &bulbMap);
+    void done(const bool success);
 private:
     static uint64_t MacToNum(const uint8_t address[8]);
     template<typename T> void HandleCallback(std::function<void(const lifx::Header &header, const T& msg)> func);

@@ -27,15 +27,18 @@ MainView {
 
     Page {
         id: root
-        title: i18n.tr("LIFX for Ubuntu Tøtsj")
+        title: i18n.tr("GlowControl for LIFX®")
+
+        head.actions: [
+            Action {
+                iconName: "reload"
+                enabled: !glowcontrol.discovering
+                onTriggered: glowcontrol.discover()
+            }
+        ]
 
         GlowControl {
             id: glowcontrol
-
-            // onDiscoveryEnded: {
-            //     console.warn('discov end');
-            //     activity.running = false;
-            // }
         }
 
         Flickable {
@@ -44,11 +47,8 @@ MainView {
             contentHeight: contentItem.childrenRect.height
             boundsBehavior: Flickable.DragAndOvershootBounds
 
-
-
             Column {
                 id: contentItem
-                spacing: units.gu(2)
 
                 Repeater {
                     id: dang
