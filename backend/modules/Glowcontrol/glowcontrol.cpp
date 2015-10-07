@@ -97,7 +97,7 @@ void GlowControl::bulbBrightnessChanged(const int &brightness) {
     }
 }
 
-void GlowControl::bulbColorChanged(const QColor &color) {
+void GlowControl::bulbColorChanged(const QVariant &color) {
     // Lightbulb* bulb = qobject_cast<Lightbulb *>(QObject::sender());
     // if (color != bulb->color()) {
     //     QVariant arg;
@@ -113,23 +113,30 @@ void GlowControl::handleDone(const lifx::Header &header) {
     qDebug() << "handleDone";
 }
 
-void GlowControl::handleBulb(const QString &label, const bool power, const QColor &color, const lifx::Header &header) {
+void GlowControl::handleBulb(const QString &label, const bool power, const QVariant &color, const lifx::Header &header) {
     // qDebug() << __PRETTY_FUNCTION__ << "handleBulb" << label;
     // m_bulblist << QString::fromStdString(bulb.label);
 
+    Lightbulb* bulb;
     if (!m_name_to_bulb.contains(label)) {
-        Lightbulb* bulb = new Lightbulb(this, header);
-        bulb->setLabel(label);
-        bulb->setPower(power);
-        bulb->setColor(color);
-        bulb->setBrightness((int)(color.lightnessF() * 65535));
-        qWarning() << "setting brightness" << (int)(color.lightnessF() * 65535);
+        bulb = new Lightbulb(this, header);
+        qWarning() << "new bulb" << label;
         setListeners(bulb);
         // qWarning() << "created bulb" << bulb->label();
         m_name_to_bulb.insert(label, bulb);
         m_bulbs.append(bulb);
         Q_EMIT bulbsChanged();
+    } else {
+        bulb = m_name_to_bulb[label];
+        qWarning() << "existing bulb" << label;
     }
+    bulb->setLabel(label);
+    bulb->setPower(power);
+    QMap<QString, QVariant> colorMap = color.toMap();
+    bulb->setColor(color);
+    bulb->setBrightness(colorMap["brightness"].toInt());
+    // qWarning() << "setting brightness" << colorMap["brightness"];
+
 }
 
 // void GlowControl::append_bulb(QQmlListProperty<Lightbulb> *list, Lightbulb *bulb) {
@@ -227,15 +234,19 @@ void BulbDiscoverer::discover() {
                         // qWarning() << "bulb label now" << bulb->label();
                         // bulb.color = msg.color;
                         // qWarning() << QString::fromStdString(msg.label) << msg.color.hue;
-                        double hue = double(msg.color.hue-0) / double(65535-0);
-                        double sat = double(msg.color.saturation-0) / double(65535-0);
-                        double bri = double(msg.color.brightness-0) / double(65535-0);
-                        double kel = 1.0;
+                        // double hue = double(msg.color.hue-0) / double(65535-0);
+                        // double sat = double(msg.color.saturation-0) / double(65535-0);
+                        // double bri = double(msg.color.brightness-0) / double(65535-0);
+                        // double kel = 1.0;
 
                         // qWarning() << QString::fromStdString(msg.label) << t;
 
-                        QColor color;
-                        color.setHslF(hue, sat, bri, kel);
+                        QMap<QString, QVariant> color;
+                        color["hue"] = QVariant(msg.color.hue);
+                        color["saturation"] = QVariant(msg.color.saturation);
+                        color["brightness"] = QVariant(msg.color.brightness);
+                        color["kelvin"] = QVariant(msg.color.kelvin);
+
                         QString a(QString::number(unsigned(MacToNum(header.target))));
                         m_found_bulbs.insert(a, QString::fromStdString(msg.label));
                         m_name_to_header[QString::fromStdString(msg.label)] = header;

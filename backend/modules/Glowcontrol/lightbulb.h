@@ -6,15 +6,17 @@
 
 #include <lib-lifx/lifx.h>
 
+#include "lifxobject.h"
+
 // TODO: Proper signatures with variable names.
 
-class Lightbulb : public QObject
+class Lightbulb : public LifxObject
 {
     Q_OBJECT
     Q_PROPERTY( QString label READ label WRITE setLabel NOTIFY labelChanged )
     Q_PROPERTY( QString group READ group WRITE setGroup NOTIFY groupChanged )
     Q_PROPERTY( bool power READ power WRITE setPower NOTIFY powerChanged )
-    Q_PROPERTY( QColor color READ color WRITE setColor NOTIFY colorChanged )
+    Q_PROPERTY( QVariant color READ color WRITE setColor NOTIFY colorChanged )
     Q_PROPERTY( int brightness READ brightness WRITE setBrightness NOTIFY brightnessChanged )
     // Q_PROPERTY( QString mac READ mac NOTIFY macChanged )
     Q_PROPERTY( QString version READ version NOTIFY versionChanged )
@@ -31,8 +33,8 @@ public:
     bool power();
     void setPower(bool);
 
-    QColor color();
-    void setColor(const QColor &);
+    QVariant color();
+    void setColor(const QVariant &color);
 
     int brightness();
     void setBrightness(const int &brightness);
@@ -47,6 +49,9 @@ public:
 public slots:
     void discover();
 
+protected:
+    void propertyChanged(const QString &key, const QVariant &value);
+
 private:
     void setMac(QString mac);
 
@@ -54,7 +59,7 @@ private:
     QString m_group;
     uint64_t m_group_updated_at;
     bool m_power;
-    QColor m_color;
+    QVariant m_color;
     int m_brightness;
     QString m_smac;
 
@@ -69,7 +74,7 @@ signals:
     void labelChanged(const QString &label);
     void groupChanged(const QString &group);
     void powerChanged(const bool power);
-    void colorChanged(const QColor &color);
+    void colorChanged(const QVariant &color);
     void brightnessChanged(const int &brightness);
     void versionChanged(const QString &version);
 // private:

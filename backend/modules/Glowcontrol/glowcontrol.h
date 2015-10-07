@@ -45,11 +45,11 @@ Q_SIGNALS:
 
 public slots:
     void handleDiscoveryEnded(const bool success);
-    void handleBulb(const QString &label, const bool power, const QColor &color, const lifx::Header &header);
+    void handleBulb(const QString &label, const bool power, const QVariant &color, const lifx::Header &header);
     void handleDone(const lifx::Header &header);
 
     void bulbPowerChanged(const bool);
-    void bulbColorChanged(const QColor &color);
+    void bulbColorChanged(const QVariant &color);
     void bulbBrightnessChanged(const int &brightness);
 
     // void handleResults(const BulbMap &bulbMap);
@@ -72,7 +72,7 @@ public slots:
     void discover();
     void handlePowerRequest(const bool, const lifx::Header &header);
 signals:
-    void bulbReady(const QString &label, const bool power, const QColor &color, const lifx::Header &header);
+    void bulbReady(const QString &label, const bool power, const QVariant &color, const lifx::Header &header);
     void done(const bool success);
 private:
     static uint64_t MacToNum(const uint8_t address[8]);

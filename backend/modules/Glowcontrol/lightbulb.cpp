@@ -1,10 +1,12 @@
 #include <QtDebug>
 #include "lightbulb.h"
 
-Lightbulb::Lightbulb(QObject *parent, lifx::Header header) :
-    QObject(parent), header(header)
-{
+#define SUPER LifxObject
 
+Lightbulb::Lightbulb(QObject *parent, lifx::Header header) :
+    SUPER(parent),
+    header(header)
+{
 }
 
 Lightbulb::~Lightbulb() {}
@@ -38,11 +40,11 @@ void Lightbulb::setPower(bool power) {
     m_power = power;
 }
 
-QColor Lightbulb::color() {
+QVariant Lightbulb::color() {
     return m_color;
 }
 
-void Lightbulb::setColor(const QColor &color) {
+void Lightbulb::setColor(const QVariant &color) {
     m_color = color;
     Q_EMIT colorChanged(color);
 }
@@ -74,3 +76,6 @@ void Lightbulb::setVersion(const uint32_t &vendor, const uint32_t &product, cons
     m_version = version;
 }
 
+void Lightbulb::propertyChanged(const QString &key, const QVariant &value) {
+
+}
