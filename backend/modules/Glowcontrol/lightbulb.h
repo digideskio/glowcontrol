@@ -58,9 +58,6 @@ private:
     QString m_label;
     QString m_group;
     uint64_t m_group_updated_at;
-    bool m_power;
-    QVariant m_color;
-    int m_brightness;
     QString m_smac;
 
     uint32_t m_vendor;

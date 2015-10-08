@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-08 00:37+0200\n"
+"POT-Creation-Date: 2015-10-08 12:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,6 +19,10 @@ msgstr ""
 
 #: ../app/qml/GlowControl.qml:30
 msgid "GlowControl for LIFX®"
+msgstr ""
+
+#: ../app/qml/GlowControl.qml:85
+msgid "No LIFX® bulbs found."
 msgstr ""
 
 #: ../build-click/out/share/GlowControl/qml/GlowControl.qml:32

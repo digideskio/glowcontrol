@@ -12,6 +12,9 @@ class LifxObject : public QObject
 {
     Q_OBJECT
 
+public:
+    void lifxSetsProperty(const QString &key, const QVariant &value);
+
 Q_SIGNALS:
     void requestSetProperty(const QString &key, const QVariant &value);
 
@@ -28,11 +31,10 @@ protected:
     QVariantMap getProperties() const;
     QVariant getProperty(const QString &key) const;
 
-private slots:
-    void onPropertyChanged(const QString &key, const QVariant &value);
 
 private:
     QVariantMap m_properties;
+    static bool safeVariantEq(const QVariant &v1, const QVariant &v2);
 
 };
 

@@ -46,22 +46,20 @@ Item {
                     margins: units.gu(2)
                 }
 
-                property int brightness: bulb.brightness
-
                 function formatValue(v) {
                     return (v / 65535).toFixed(2);
                 }
 
                 minimumValue: 0
                 maximumValue: 65535
-                value: brightness
+                value: bulb.brightness
                 live: true
 
                 onValueChanged: bulb.brightness = value
 
                 Connections {
                     target: bulb
-                    onBrightnessChanged: brightnessSlider.brightness = brightness
+                    onBrightnessChanged: brightnessSlider.value = brightness
                 }
             }
         }

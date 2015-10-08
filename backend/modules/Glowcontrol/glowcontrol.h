@@ -51,6 +51,7 @@ public slots:
     void bulbPowerChanged(const bool);
     void bulbColorChanged(const QVariant &color);
     void bulbBrightnessChanged(const int &brightness);
+    void bulbRequestsSetProperty(const QString &key, const QVariant &value);
 
     // void handleResults(const BulbMap &bulbMap);
 

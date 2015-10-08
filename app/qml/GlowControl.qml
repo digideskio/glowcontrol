@@ -76,6 +76,17 @@ MainView {
 
             }
 
+            Label {
+                anchors {
+                    fill: parent
+                    centerIn: parent
+                }
+                visible: glowcontrol.bulbs.length === 0 && !glowcontrol.discovering
+                text: i18n.tr("No LIFX® bulbs found.")
+                horizontalAlignment: Text.AlignHCenter
+                fontSize: "large"
+            }
+
             // boundsBehavior: (contentHeight > root.height) ?
             //                  Flickable.DragAndOvershootBounds :
             //                  Flickable.StopAtBounds

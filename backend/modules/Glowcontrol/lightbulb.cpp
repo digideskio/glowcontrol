@@ -12,50 +12,58 @@ Lightbulb::Lightbulb(QObject *parent, lifx::Header header) :
 Lightbulb::~Lightbulb() {}
 
 QString Lightbulb::label() {
-    return m_label;
+    return getProperty("Label").toString();
 }
 
+void Lightbulb::setLabel(const QString &label) {
+    if (getProperty("Label").toString() != label) {
+        setProperty("Label", QVariant(label));
+    }
+}
+
+// XXX: non-functional
 void Lightbulb::setMac(QString mac) {
 
 }
 
-void Lightbulb::setLabel(const QString &label) {
-    m_label = label;
-}
-
+// XXX: non-functional
 QString Lightbulb::group() {
     return m_group;
 }
 
+// XXX: non-functional
 void Lightbulb::setGroup(const QString &group) {
     m_group = group;
 }
 
 bool Lightbulb::power() {
-    return m_power;
+    return getProperty("Power").toBool();
 }
 
 void Lightbulb::setPower(bool power) {
-    Q_EMIT powerChanged(power);
-    m_power = power;
+    if (getProperty("Power").toBool() != power) {
+        setProperty("Power", QVariant(power));
+    }
 }
 
 QVariant Lightbulb::color() {
-    return m_color;
+    return getProperty("Color");
 }
 
 void Lightbulb::setColor(const QVariant &color) {
-    m_color = color;
-    Q_EMIT colorChanged(color);
+    if (getProperty("Color") != color) {
+        setProperty("Color", color);
+    }
 }
 
 int Lightbulb::brightness() {
-    return m_brightness;
+    return getProperty("Brightness").toInt();
 }
 
 void Lightbulb::setBrightness(const int &brightness) {
-    Q_EMIT brightnessChanged(brightness);
-    m_brightness = brightness;
+    if (getProperty("Brightness").toInt() != brightness) {
+        setProperty("Brightness", QVariant(brightness));
+    }
 }
 
 // std::array<uint8_t, 8> Lightbulb::mac() {
@@ -66,10 +74,12 @@ void Lightbulb::setBrightness(const int &brightness) {
 //     m_mac_address = mac;
 // }
 
+// XXX: non-functional
 QString Lightbulb::version() {
     return QString();
 }
 
+// XXX: non-functional
 void Lightbulb::setVersion(const uint32_t &vendor, const uint32_t &product, const uint32_t &version) {
     m_vendor = vendor;
     m_product = product;
@@ -77,5 +87,15 @@ void Lightbulb::setVersion(const uint32_t &vendor, const uint32_t &product, cons
 }
 
 void Lightbulb::propertyChanged(const QString &key, const QVariant &value) {
-
+    SUPER::propertyChanged(key, value);
+    if (key == QStringLiteral("Label")) {
+        Q_EMIT labelChanged(value.toString());
+    } else if (key == QStringLiteral("Power")) {
+        Q_EMIT powerChanged(value.toBool());
+    } else if (key == QStringLiteral("Color")) {
+        Q_EMIT colorChanged(value);
+    } else if (key == QStringLiteral("Brightness")) {
+        qDebug() << __func__ << key << value << label();
+        Q_EMIT brightnessChanged(value.toInt());
+    }
 }

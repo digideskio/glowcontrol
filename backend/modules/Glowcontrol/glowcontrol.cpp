@@ -46,9 +46,7 @@ GlowControl::GlowControl(QObject *parent) :
 }
 
 void GlowControl::setListeners(Lightbulb * bulb) {
-    connect(bulb, &Lightbulb::powerChanged, this, &GlowControl::bulbPowerChanged);
-    connect(bulb, &Lightbulb::colorChanged, this, &GlowControl::bulbColorChanged);
-    connect(bulb, &Lightbulb::brightnessChanged, this, &GlowControl::bulbBrightnessChanged);
+    connect(bulb, &Lightbulb::requestSetProperty, this, &GlowControl::bulbRequestsSetProperty);
 }
 
 bool GlowControl::discover() {
@@ -63,6 +61,19 @@ bool GlowControl::discover() {
     }
 }
 
+void GlowControl::bulbRequestsSetProperty(const QString &key, const QVariant &value) {
+    Lightbulb* bulb = qobject_cast<Lightbulb *>(QObject::sender());
+    if (key == QStringLiteral("Label")) {
+        // TODO: implement
+    } else if (key == QStringLiteral("Power")) {
+        emit bulbRequest(QStringLiteral("power"), value.toBool(), bulb->header);
+    } else if (key == QStringLiteral("Color")) {
+        // TODO: implement
+    } else if (key == QStringLiteral("Brightness")) {
+        emit bulbRequest(QString("brightness"), value.toInt(), bulb->header);
+    }
+}
+
 bool GlowControl::discovering() {
     return m_discovering;
 }
@@ -73,42 +84,6 @@ void GlowControl::handleDiscoveryEnded(const bool success) {
     emit discoveringChanged(m_discovering);
 }
 
-void GlowControl::bulbPowerChanged(const bool power) {
-    Lightbulb* bulb = qobject_cast<Lightbulb *>(QObject::sender());
-    if (power != bulb->power()) {
-        QVariant arg;
-        arg.setValue(power);
-        qWarning() << "heading power request";
-        emit bulbRequest(QString("power"), arg, bulb->header);
-    } else {
-        qWarning() << "ignoring power request";
-    }
-}
-
-void GlowControl::bulbBrightnessChanged(const int &brightness) {
-    Lightbulb* bulb = qobject_cast<Lightbulb *>(QObject::sender());
-    if (brightness != bulb->brightness()) {
-        QVariant arg;
-        arg.setValue(brightness);
-        qWarning() << "heading brightness request";
-        emit bulbRequest(QString("brightness"), arg, bulb->header);
-    } else {
-        qWarning() << "ignoring brightness request" << brightness << "vs" << bulb->brightness();
-    }
-}
-
-void GlowControl::bulbColorChanged(const QVariant &color) {
-    // Lightbulb* bulb = qobject_cast<Lightbulb *>(QObject::sender());
-    // if (color != bulb->color()) {
-    //     QVariant arg;
-    //     arg.setValue(color);
-    //     qWarning() << "heading power request";
-    //     emit bulbRequest(QString("power"), arg, bulb->header);
-    // } else {
-    //     qWarning() << "ignoring power request";
-    // }
-}
-
 void GlowControl::handleDone(const lifx::Header &header) {
     qDebug() << "handleDone";
 }
@@ -117,6 +92,9 @@ void GlowControl::handleBulb(const QString &label, const bool power, const QVari
     // qDebug() << __PRETTY_FUNCTION__ << "handleBulb" << label;
     // m_bulblist << QString::fromStdString(bulb.label);
 
+    // XXX: needs QPointer to guard
+    // against dangling pointers if
+    // a bulb qobj is ever deleted
     Lightbulb* bulb;
     if (!m_name_to_bulb.contains(label)) {
         bulb = new Lightbulb(this, header);
@@ -130,21 +108,15 @@ void GlowControl::handleBulb(const QString &label, const bool power, const QVari
         bulb = m_name_to_bulb[label];
         qWarning() << "existing bulb" << label;
     }
-    bulb->setLabel(label);
-    bulb->setPower(power);
+
+    bulb->lifxSetsProperty("Label", QVariant(label));
+    bulb->lifxSetsProperty("Power", QVariant(power));
     QMap<QString, QVariant> colorMap = color.toMap();
-    bulb->setColor(color);
-    bulb->setBrightness(colorMap["brightness"].toInt());
+    bulb->lifxSetsProperty("Color", color);
+    bulb->lifxSetsProperty("Brightness", colorMap["brightness"]);
     // qWarning() << "setting brightness" << colorMap["brightness"];
 
 }
-
-// void GlowControl::append_bulb(QQmlListProperty<Lightbulb> *list, Lightbulb *bulb) {
-//     GlowControl *gControl = qobject_cast<GlowControl *>(list->object);
-//     if (bulb)
-//         gControl->m_bulbs.append(bulb);
-// }
-
 
 GlowControl::~GlowControl() {
     discovererThread.quit();
@@ -336,24 +308,6 @@ void BulbWorker::handleRequest(const QString &type, const QVariant &arg, const l
         }
     } else if (type == "brightness") {
         int brightness = arg.toInt();
-
-
-  // typedef struct
-  // {
-  //   uint16_t  hue;
-  //   uint16_t  saturation;
-  //   uint16_t  brightness;
-  //   uint16_t  kelvin;
-  // } HSBK;
-
-    // struct SetColor
-    // {
-    //   static constexpr uint16_t type = 102;
-    //   static constexpr bool has_response = false;
-    //   uint8_t:8;
-    //   HSBK color;
-    //   uint32_t duration;
-    // };
 
         lifx::message::light::SetColor colorMsg {};
         colorMsg.color.brightness = brightness;
