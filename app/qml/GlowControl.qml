@@ -29,14 +29,6 @@ MainView {
         id: root
         title: i18n.tr("GlowControl for LIFX®")
 
-        head.actions: [
-            Action {
-                iconName: "reload"
-                enabled: !glowcontrol.discovering
-                onTriggered: glowcontrol.discover()
-            }
-        ]
-
         GlowControl {
             id: glowcontrol
         }
@@ -81,7 +73,7 @@ MainView {
                     fill: parent
                     centerIn: parent
                 }
-                visible: glowcontrol.bulbs.length === 0 && !glowcontrol.discovering
+                visible: glowcontrol.bulbs.length === 0
                 text: i18n.tr("No LIFX® bulbs found.")
                 horizontalAlignment: Text.AlignHCenter
                 fontSize: "large"

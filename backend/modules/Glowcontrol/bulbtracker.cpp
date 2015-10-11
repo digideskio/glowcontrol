@@ -1,16 +1,42 @@
 #include <QtDebug>
 
-#include "bulbdiscoverer.h"
+#include "bulbtracker.h"
 
-BulbDiscoverer::BulbDiscoverer(QObject *parent) :
+BulbTracker::BulbTracker(QObject *parent) :
     QObject(parent),
     m_client(1300)
 {
-    qDebug() << "Started discoverer" << 1300;
+    m_timer = new QTimer(this);
+    qDebug() << "Started tracker" << 1300;
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
+    m_timer->setTimerType(Qt::VeryCoarseTimer);
+}
+
+void BulbTracker::start() {
+    qDebug() << "BulbTracker, timer start";
+    m_timer->start(0);
+}
+
+void BulbTracker::stop() {
+    qDebug() << "BulbTracker, timer stop";
+    m_timer->stop();
+}
+
+void BulbTracker::update() {
+    m_timer->stop();
+    qDebug() << "BulbTracker" << __func__;
+    registerCallbacks();
+    m_client.Broadcast<lifx::message::device::GetService>({});
+    identify();
+    qDebug() << "BulbTracker" << __func__ << "Ending search";
+    m_found_bulbs.clear();
+    m_name_to_header.clear();
+    m_timer->start(2000);
+    // emit done(true);
 }
 
 template<typename T>
-void BulbDiscoverer::HandleCallback(
+void BulbTracker::HandleCallback(
         std::function<void(const lifx::Header& header, const T& msg)> func) {
     m_client.RegisterCallback<T>(
         [func = std::move(func), this]
@@ -23,7 +49,7 @@ void BulbDiscoverer::HandleCallback(
     );
 }
 
-uint64_t BulbDiscoverer::MacToNum(const uint8_t address[8]) {
+uint64_t BulbTracker::MacToNum(const uint8_t address[8]) {
     uint64_t num =
         static_cast<uint64_t>(address[0]) << 56 |
         static_cast<uint64_t>(address[1]) << 48 |
@@ -36,16 +62,13 @@ uint64_t BulbDiscoverer::MacToNum(const uint8_t address[8]) {
     return std::move(num);
 }
 
-void BulbDiscoverer::discover() {
-
-    qDebug() << "BulbDiscoverer" << __func__ << "discover";
-
+void BulbTracker::registerCallbacks() {
     m_client.RegisterCallback<lifx::message::device::StateService>(
         [this](const lifx::Header& header, const lifx::message::device::StateService& msg) {
             if (msg.service == lifx::SERVICE_UDP) {
                 QString a(QString::number(unsigned(MacToNum(header.target))));
                 m_found_bulbs.insert(a, QString());
-                // BulbDiscoverer::MacToNum(header.target)
+                // BulbTracker::MacToNum(header.target)
                 // HandleCallback<lifx::message::device::StateLocation>(
                 //     [](Lightbulb* bulb, const lifx::message::device::StateLocation& msg)
                 //     {
@@ -105,10 +128,10 @@ void BulbDiscoverer::discover() {
             }
         }
     );
+}
 
-    m_client.Broadcast<lifx::message::device::GetService>({});
+void BulbTracker::identify() {
     unsigned int num_identified = 0;
-
     int count = 0;
     for (;;) {
         m_client.RunOnce();
@@ -144,63 +167,60 @@ void BulbDiscoverer::discover() {
             break;
         }
         count++;
-        QThread::sleep(0.05);
     }
-    qDebug() << "BulbDiscoverer" << __func__ << "Ending search";
-    m_found_bulbs.clear();
-    m_name_to_header.clear();
-    emit done(true);
 }
 
-void BulbDiscoverer::requestState(const lifx::Header &header) {
-    qDebug() << __func__;
-    bool resp = false;
-    lifx::Header targetHeader = header;
-    // HandleCallback<lifx::message::light::State>(
-    //     [this, &resp](const lifx::Header& header, const lifx::message::light::State& msg)
-    //     {
-    //         qDebug() << __func__ << "will talk back";
-    //         QMap<QString, QVariant> color;
-    //         color["hue"] = QVariant(msg.color.hue);
-    //         color["saturation"] = QVariant(msg.color.saturation);
-    //         color["brightness"] = QVariant(msg.color.brightness);
-    //         color["kelvin"] = QVariant(msg.color.kelvin);
+// void BulbTracker::requestState(const lifx::Header &header) {
+//     qDebug() << __func__;
+//     bool resp = false;
+//     lifx::Header targetHeader = header;
+//     // HandleCallback<lifx::message::light::State>(
+//     //     [this, &resp](const lifx::Header& header, const lifx::message::light::State& msg)
+//     //     {
+//     //         qDebug() << __func__ << "will talk back";
+//     //         QMap<QString, QVariant> color;
+//     //         color["hue"] = QVariant(msg.color.hue);
+//     //         color["saturation"] = QVariant(msg.color.saturation);
+//     //         color["brightness"] = QVariant(msg.color.brightness);
+//     //         color["kelvin"] = QVariant(msg.color.kelvin);
 
-    //         emit bulbReady(QString::fromStdString(msg.label), msg.power > 0, color, header);
-    //         resp = true;
-    //     }
-    // );
+//     //         emit bulbReady(QString::fromStdString(msg.label), msg.power > 0, color, header);
+//     //         resp = true;
+//     //     }
+//     // );
 
-    m_client.RegisterCallback<lifx::message::light::State>(
-        [this](const lifx::Header& header, const lifx::message::light::State& msg) {
-            qDebug() << __func__ << "will talk back";
-            QMap<QString, QVariant> color;
-            color["hue"] = QVariant(msg.color.hue);
-            color["saturation"] = QVariant(msg.color.saturation);
-            color["brightness"] = QVariant(msg.color.brightness);
-            color["kelvin"] = QVariant(msg.color.kelvin);
-            emit bulbReady(QString::fromStdString(msg.label), msg.power > 0, color, header);
-        }
-    );
+//     m_client.RegisterCallback<lifx::message::light::State>(
+//         [this](const lifx::Header& header, const lifx::message::light::State& msg) {
+//             qDebug() << __func__ << "will talk back";
+//             QMap<QString, QVariant> color;
+//             color["hue"] = QVariant(msg.color.hue);
+//             color["saturation"] = QVariant(msg.color.saturation);
+//             color["brightness"] = QVariant(msg.color.brightness);
+//             color["kelvin"] = QVariant(msg.color.kelvin);
+//             emit bulbReady(QString::fromStdString(msg.label), msg.power > 0, color, header);
+//         }
+//     );
 
-    m_client.Send<lifx::message::light::Get>(header.target);
+//     m_client.Send<lifx::message::light::Get>(header.target);
 
-    while (m_client.WaitingToSend()) {
-        m_client.RunOnce();
-    }
+//     while (m_client.WaitingToSend()) {
+//         m_client.RunOnce();
+//     }
 
-    // lifx::LifxClient::RunResult res;
-    // int count = 0;
-    // while (!resp) {
-    //     res = m_client.RunOnce();
-    //     qDebug() << __func__ << "loop" << count << (int)res;
-    //     if (count > 100) {
-    //         qDebug() << "giving up requestState, last run was" << (int)res;
-    //         break;
-    //     }
-    //     QThread::msleep(100);
-    //     count++;
-    // }
+//     // lifx::LifxClient::RunResult res;
+//     // int count = 0;
+//     // while (!resp) {
+//     //     res = m_client.RunOnce();
+//     //     qDebug() << __func__ << "loop" << count << (int)res;
+//     //     if (count > 100) {
+//     //         qDebug() << "giving up requestState, last run was" << (int)res;
+//     //         break;
+//     //     }
+//     //     QThread::msleep(100);
+//     //     count++;
+//     // }
+// }
+
+BulbTracker::~BulbTracker() {
+    delete m_timer;
 }
-
-BulbDiscoverer::~BulbDiscoverer() {}

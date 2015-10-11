@@ -1,4 +1,5 @@
 #include <QtDebug>
+#include <QThread>
 
 #include "bulbworker.h"
 
@@ -55,10 +56,6 @@ void BulbWorker::handleRequest(const QString &type, const QVariant &arg, const l
     //     m_client.RunOnce();
     // }
     emit done(header, talkback);
-}
-
-void BulbWorker::handleStateRequest(const QString &type, const lifx::Header &header) {
-
 }
 
 BulbWorker::~BulbWorker () {}

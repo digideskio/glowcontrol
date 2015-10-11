@@ -1,5 +1,7 @@
 #include <QtDebug>
 #include <unistd.h>
+#include <algorithm>
+
 #include "glowcontrol.h"
 
 class Lightbulb;
@@ -28,15 +30,16 @@ GlowControl::GlowControl(QObject *parent) :
     qRegisterMetaType<lifx::Header>("lifx::Header");
 
     // Discoverer will do discovery at startup and when refresh is clicked.
-    BulbDiscoverer *discoverer = new BulbDiscoverer();
-    discoverer->moveToThread(&discovererThread);
-    // connect(&discovererThread, &QThread::finished, discoverer, &QObject::deleteLater);
-    connect(this, &GlowControl::discoverRequest, discoverer, &BulbDiscoverer::discover);
-    connect(this, &GlowControl::stateRequest, discoverer, &BulbDiscoverer::requestState);
-    connect(discoverer, &BulbDiscoverer::bulbReady, this, &GlowControl::handleBulb);
-    connect(discoverer, &BulbDiscoverer::done, this, &GlowControl::handleDiscoveryEnded);
-    discovererThread.start();
-    discover();
+    BulbTracker *tracker = new BulbTracker();
+    tracker->moveToThread(&trackerThread);
+    // connect(&trackerThread, &QThread::finished, tracker, &QObject::deleteLater);
+    connect(this, &GlowControl::requestTrackerStart, tracker, &BulbTracker::start);
+    connect(this, &GlowControl::requestTrackerStop, tracker, &BulbTracker::stop);
+    // connect(this, &GlowControl::stateRequest, tracker, &BulbTracker::requestState);
+    connect(tracker, &BulbTracker::bulbReady, this, &GlowControl::handleBulb);
+    //connect(tracker, &BulbTracker::done, this, &GlowControl::handleDiscoveryEnded);
+    trackerThread.start();
+    requestTrackerStart();
 
     // Worker is our worker, it does talking to bulbs etc.
     BulbWorker *worker = new BulbWorker();
@@ -50,17 +53,17 @@ void GlowControl::setListeners(Lightbulb * bulb) {
     connect(bulb, &Lightbulb::requestSetProperty, this, &GlowControl::bulbRequestsSetProperty);
 }
 
-bool GlowControl::discover() {
-    qWarning() << "GlowControl" << __func__ << "discover";
-    if (m_discovering) {
-        return false;
-    } else {
-        m_discovering = true;
-        emit discoveringChanged(m_discovering);
-        emit discoverRequest();
-        return true;
-    }
-}
+// bool GlowControl::discover() {
+//     qWarning() << "GlowControl" << __func__ << "discover";
+//     if (m_discovering) {
+//         return false;
+//     } else {
+//         m_discovering = true;
+//         emit discoveringChanged(m_discovering);
+//         emit discoverRequest();
+//         return true;
+//     }
+// }
 
 void GlowControl::bulbRequestsSetProperty(const QString &key, const QVariant &value) {
     Lightbulb* bulb = qobject_cast<Lightbulb *>(QObject::sender());
@@ -75,15 +78,15 @@ void GlowControl::bulbRequestsSetProperty(const QString &key, const QVariant &va
     }
 }
 
-bool GlowControl::discovering() {
-    return m_discovering;
-}
+// bool GlowControl::discovering() {
+//     return m_discovering;
+// }
 
-void GlowControl::handleDiscoveryEnded(const bool success) {
-    qWarning() << "handleDiscoveryEnded";
-    m_discovering = false;
-    emit discoveringChanged(m_discovering);
-}
+// void GlowControl::handleDiscoveryEnded(const bool success) {
+//     qWarning() << "handleDiscoveryEnded";
+//     m_discovering = false;
+//     emit discoveringChanged(m_discovering);
+// }
 
 // void GlowControl::handleBulbTalkback(const QString &label, const bool power, const QVariant &color, const lifx::Header &header) {
 //     qDebug() << __func__ << label << power << color;
@@ -94,6 +97,10 @@ void GlowControl::handleDiscoveryEnded(const bool success) {
 //     bulb->lifxSetsProperty("Color", color);
 //     bulb->lifxSetsProperty("Brightness", colorMap["brightness"]);
 // }
+
+bool sort(Lightbulb* a, Lightbulb* b) {
+    return a->label() < b->label();
+}
 
 void GlowControl::handleBulb(const QString &label, const bool power, const QVariant &color, const lifx::Header &header) {
     // qDebug() << __PRETTY_FUNCTION__ << "handleBulb" << label;
@@ -109,8 +116,11 @@ void GlowControl::handleBulb(const QString &label, const bool power, const QVari
         setListeners(bulb);
         // qWarning() << "created bulb" << bulb->label();
         m_name_to_bulb.insert(label, bulb);
+
         m_bulbs.append(bulb);
+        std::sort(m_bulbs.begin(), m_bulbs.end(), sort);
         Q_EMIT bulbsChanged();
+
     } else {
         bulb = m_name_to_bulb[label];
         qWarning() << "existing bulb" << label;
@@ -133,8 +143,9 @@ void GlowControl::handleWorkerDone(const lifx::Header &header, const bool talkba
 }
 
 GlowControl::~GlowControl() {
-    discovererThread.quit();
-    discovererThread.wait();
+    emit requestTrackerStop();
+    trackerThread.quit();
+    trackerThread.wait();
     workerThread.quit();
     workerThread.wait();
 }

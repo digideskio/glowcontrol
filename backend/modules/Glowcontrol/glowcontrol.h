@@ -6,7 +6,7 @@
 #include <QQmlListProperty>
 #include <lib-lifx/lifx.h>
 
-#include "bulbdiscoverer.h"
+#include "bulbtracker.h"
 #include "bulbworker.h"
 #include "lightbulb.h"
 
@@ -14,8 +14,8 @@ class GlowControl : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<Lightbulb> bulbs READ getLightbulbList NOTIFY bulbsChanged)
-    Q_PROPERTY(bool discovering READ discovering NOTIFY discoveringChanged)
-    QThread discovererThread;
+    // Q_PROPERTY(bool discovering READ discovering NOTIFY discoveringChanged)
+    QThread trackerThread;
     QThread workerThread;
 public:
     explicit GlowControl(QObject *parent = 0);
@@ -37,9 +37,10 @@ public:
    Q_INVOKABLE bool discover();
 
 Q_SIGNALS:
-    void discoveringChanged(const bool);
-    void discoverRequest();
-    void discoveryDone();
+    // void discoveringChanged(const bool);
+    void requestTrackerStart();
+    void requestTrackerStop();
+    // void discoveryDone();
     void stateRequest(const lifx::Header &header);
     void bulbsChanged();
     void bulbRequest(const QString &type, const QVariant &arg, const lifx::Header &header, const bool talkback = true);

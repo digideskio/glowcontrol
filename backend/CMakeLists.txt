@@ -13,7 +13,7 @@ set(
     Glowcontrolbackend_SRCS
     modules/Glowcontrol/lifxobject.cpp
     modules/Glowcontrol/lightbulb.cpp
-    modules/Glowcontrol/bulbdiscoverer.cpp
+    modules/Glowcontrol/bulbtracker.cpp
     modules/Glowcontrol/bulbworker.cpp
     modules/Glowcontrol/glowcontrol.cpp
     modules/Glowcontrol/backend.cpp
