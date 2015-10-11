@@ -13,8 +13,10 @@ set(
     Glowcontrolbackend_SRCS
     modules/Glowcontrol/lifxobject.cpp
     modules/Glowcontrol/lightbulb.cpp
-    modules/Glowcontrol/backend.cpp
+    modules/Glowcontrol/bulbdiscoverer.cpp
+    modules/Glowcontrol/bulbworker.cpp
     modules/Glowcontrol/glowcontrol.cpp
+    modules/Glowcontrol/backend.cpp
 )
 
 add_library(Glowcontrolbackend MODULE
