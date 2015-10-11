@@ -95,7 +95,6 @@ void Lightbulb::propertyChanged(const QString &key, const QVariant &value) {
     } else if (key == QStringLiteral("Color")) {
         Q_EMIT colorChanged(value);
     } else if (key == QStringLiteral("Brightness")) {
-        qDebug() << __func__ << key << value << label();
         Q_EMIT brightnessChanged(value.toInt());
     }
 }

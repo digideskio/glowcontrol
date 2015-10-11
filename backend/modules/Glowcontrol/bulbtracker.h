@@ -12,7 +12,7 @@ class BulbTracker : public QObject
     Q_OBJECT
 
 public:
-    explicit BulbTracker(QObject *parent = 0);
+    explicit BulbTracker(QObject *parent = 0, int interval = 1000);
     ~BulbTracker();
 
 public slots:
@@ -36,6 +36,7 @@ private:
     QMap<QString, QString> m_found_bulbs;
     QMap<QString, lifx::Header> m_name_to_header;
     QTimer *m_timer;
+    int m_interval;
 };
 
 #endif // BULBTRACKER_H

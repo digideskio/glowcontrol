@@ -2,37 +2,34 @@
 
 #include "bulbtracker.h"
 
-BulbTracker::BulbTracker(QObject *parent) :
+BulbTracker::BulbTracker(QObject *parent, int interval) :
     QObject(parent),
-    m_client(1300)
+    m_client(1300),
+    m_interval(interval)
 {
     m_timer = new QTimer(this);
-    qDebug() << "Started tracker" << 1300;
     connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
     m_timer->setTimerType(Qt::VeryCoarseTimer);
 }
 
 void BulbTracker::start() {
-    qDebug() << "BulbTracker, timer start";
     m_timer->start(0);
 }
 
 void BulbTracker::stop() {
-    qDebug() << "BulbTracker, timer stop";
     m_timer->stop();
 }
 
 void BulbTracker::update() {
     m_timer->stop();
-    qDebug() << "BulbTracker" << __func__;
     registerCallbacks();
     m_client.Broadcast<lifx::message::device::GetService>({});
     identify();
-    qDebug() << "BulbTracker" << __func__ << "Ending search";
     m_found_bulbs.clear();
     m_name_to_header.clear();
-    m_timer->start(2000);
+    m_timer->start(m_interval);
     // emit done(true);
+    qDebug() << "BulbTracker, update done.";
 }
 
 template<typename T>
@@ -99,15 +96,11 @@ void BulbTracker::registerCallbacks() {
                     {
                         // bulb->setPower(msg.power > 0);
                         // bulb->setLabel(QString::fromStdString(msg.label));
-                        // qWarning() << "bulb label now" << bulb->label();
                         // bulb.color = msg.color;
-                        // qWarning() << QString::fromStdString(msg.label) << msg.color.hue;
                         // double hue = double(msg.color.hue-0) / double(65535-0);
                         // double sat = double(msg.color.saturation-0) / double(65535-0);
                         // double bri = double(msg.color.brightness-0) / double(65535-0);
                         // double kel = 1.0;
-
-                        // qWarning() << QString::fromStdString(msg.label) << t;
 
                         QMap<QString, QVariant> color;
                         color["hue"] = QVariant(msg.color.hue);
@@ -119,7 +112,6 @@ void BulbTracker::registerCallbacks() {
                         m_found_bulbs.insert(a, QString::fromStdString(msg.label));
                         m_name_to_header[QString::fromStdString(msg.label)] = header;
                         emit bulbReady(QString::fromStdString(msg.label), msg.power > 0, color, header);
-                        // qDebug() << __func__ << "bulbReady" << QString::fromStdString(bulb.label);
 
                         // m_client.Send<lifx::message::device::GetGroup>(bulb.mac.data());
                     }
@@ -153,17 +145,13 @@ void BulbTracker::identify() {
                     num_identified++;
                 }
             }
-            // qDebug() << __func__ << num_identified << "/" << m_found_bulbs.size();
 
             if (num_identified == m_found_bulbs.size()) {
                 //RunCommands(argc, argv);
-                qDebug() << "Found all.";
                 break;
             }
         }
-        // qDebug() << count;
         if (count > 15000) {
-            qDebug() << "time is money, giving up discovery";
             break;
         }
         count++;

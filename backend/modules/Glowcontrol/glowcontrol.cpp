@@ -54,7 +54,6 @@ void GlowControl::setListeners(Lightbulb * bulb) {
 }
 
 // bool GlowControl::discover() {
-//     qWarning() << "GlowControl" << __func__ << "discover";
 //     if (m_discovering) {
 //         return false;
 //     } else {
@@ -83,13 +82,11 @@ void GlowControl::bulbRequestsSetProperty(const QString &key, const QVariant &va
 // }
 
 // void GlowControl::handleDiscoveryEnded(const bool success) {
-//     qWarning() << "handleDiscoveryEnded";
 //     m_discovering = false;
 //     emit discoveringChanged(m_discovering);
 // }
 
 // void GlowControl::handleBulbTalkback(const QString &label, const bool power, const QVariant &color, const lifx::Header &header) {
-//     qDebug() << __func__ << label << power << color;
 //     Lightbulb* bulb = m_name_to_bulb[label];
 //     bulb->lifxSetsProperty("Label", QVariant(label));
 //     bulb->lifxSetsProperty("Power", QVariant(power));
@@ -103,7 +100,6 @@ bool sort(Lightbulb* a, Lightbulb* b) {
 }
 
 void GlowControl::handleBulb(const QString &label, const bool power, const QVariant &color, const lifx::Header &header) {
-    // qDebug() << __PRETTY_FUNCTION__ << "handleBulb" << label;
     // m_bulblist << QString::fromStdString(bulb.label);
 
     // XXX: needs QPointer to guard
@@ -112,18 +108,15 @@ void GlowControl::handleBulb(const QString &label, const bool power, const QVari
     Lightbulb* bulb;
     if (!m_name_to_bulb.contains(label)) {
         bulb = new Lightbulb(this, header);
-        qWarning() << "new bulb" << label;
         setListeners(bulb);
-        // qWarning() << "created bulb" << bulb->label();
         m_name_to_bulb.insert(label, bulb);
 
         m_bulbs.append(bulb);
         std::sort(m_bulbs.begin(), m_bulbs.end(), sort);
         Q_EMIT bulbsChanged();
-
+        qDebug() << "GlowControl, saw new bulb:" << label;
     } else {
         bulb = m_name_to_bulb[label];
-        qWarning() << "existing bulb" << label;
     }
 
     bulb->lifxSetsProperty("Label", QVariant(label));
@@ -131,12 +124,10 @@ void GlowControl::handleBulb(const QString &label, const bool power, const QVari
     QMap<QString, QVariant> colorMap = color.toMap();
     bulb->lifxSetsProperty("Color", color);
     bulb->lifxSetsProperty("Brightness", colorMap["brightness"]);
-    qWarning() << label << (power ? "now on" : "now off") << ", brightness:" << colorMap["brightness"];
 
 }
 
 void GlowControl::handleWorkerDone(const lifx::Header &header, const bool talkback) {
-    qDebug() << __func__ << "will" << (talkback ? "" : "not") << "talkback";
     if (talkback) {
         emit stateRequest(header);
     }

@@ -7,11 +7,9 @@ BulbWorker::BulbWorker(QObject *parent) :
     QObject(parent),
     m_client(1400)
 {
-    qDebug() << "Started worker" << 1400;
 }
 
 void BulbWorker::handleRequest(const QString &type, const QVariant &arg, const lifx::Header &header, const bool talkback) {
-    qDebug() << "handle request" << type << arg << ", " << (talkback ? "and will talk back" : "will not talk back");
 
     std::array<uint8_t, 8> mac_address;
     for (auto i : {0, 1, 2, 3, 4, 5, 6, 7}) {
@@ -21,7 +19,6 @@ void BulbWorker::handleRequest(const QString &type, const QVariant &arg, const l
     // TODO: Use enums.
     if (type == "power") {
         bool power = arg.toBool();
-        qDebug() << "powering" << (power ? "up" : "down");
         if (power) {
             lifx::message::device::SetPower powerMsg{ 65535 };
             m_client.Send<lifx::message::device::SetPower>(powerMsg, mac_address.data());
