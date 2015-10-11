@@ -1,3 +1,26 @@
+/*
+The MIT License (MIT)
+Copyright © 2015 Jonas G. Drange <jonas@drange.net>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
 #include <QtDebug>
 #include <QThread>
 
@@ -9,8 +32,9 @@ BulbWorker::BulbWorker(QObject *parent) :
 {
 }
 
-void BulbWorker::handleRequest(const QString &type, const QVariant &arg, const lifx::Header &header, const bool talkback) {
+void BulbWorker::doJob(const QString &type, const QVariant &arg, const lifx::Header &header) {
 
+    // XXX: Do not assume there's a mac here. If there's none, make it a broadcast.
     std::array<uint8_t, 8> mac_address;
     for (auto i : {0, 1, 2, 3, 4, 5, 6, 7}) {
         mac_address[i] = header.target[i];
@@ -37,22 +61,7 @@ void BulbWorker::handleRequest(const QString &type, const QVariant &arg, const l
         m_client.RunOnce();
     }
 
-    // m_client.RegisterCallback<lifx::message::light::State>(
-    //     [this](const lifx::Header& header, const lifx::message::light::State& msg) {
-    //         QMap<QString, QVariant> color;
-    //         color["hue"] = QVariant(msg.color.hue);
-    //         color["saturation"] = QVariant(msg.color.saturation);
-    //         color["brightness"] = QVariant(msg.color.brightness);
-    //         color["kelvin"] = QVariant(msg.color.kelvin);
-    //         emit bulbTalkback(QString::fromStdString(msg.label), msg.power > 0, color, header);
-    //     }
-    // );
-    // m_client.Send<lifx::message::light::Get>(header.target);
-
-    // while (m_client.WaitingToSend()) {
-    //     m_client.RunOnce();
-    // }
-    emit done(header, talkback);
+    emit done(header);
 }
 
 BulbWorker::~BulbWorker () {}

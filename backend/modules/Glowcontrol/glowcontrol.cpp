@@ -24,28 +24,24 @@ std::unordered_map<std::string, lifx::HSBK> colors =
 };
 
 GlowControl::GlowControl(QObject *parent) :
-        QObject(parent),
-        m_discovering(false)
+        QObject(parent)
 {
     qRegisterMetaType<lifx::Header>("lifx::Header");
 
-    // Discoverer will do discovery at startup and when refresh is clicked.
     BulbTracker *tracker = new BulbTracker();
     tracker->moveToThread(&trackerThread);
-    // connect(&trackerThread, &QThread::finished, tracker, &QObject::deleteLater);
+    connect(&trackerThread, &QThread::finished, tracker, &QObject::deleteLater);
     connect(this, &GlowControl::requestTrackerStart, tracker, &BulbTracker::start);
     connect(this, &GlowControl::requestTrackerStop, tracker, &BulbTracker::stop);
-    // connect(this, &GlowControl::stateRequest, tracker, &BulbTracker::requestState);
     connect(tracker, &BulbTracker::bulbReady, this, &GlowControl::handleBulb);
-    //connect(tracker, &BulbTracker::done, this, &GlowControl::handleDiscoveryEnded);
     trackerThread.start();
     requestTrackerStart();
 
     // Worker is our worker, it does talking to bulbs etc.
     BulbWorker *worker = new BulbWorker();
     worker->moveToThread(&workerThread);
-    connect(this, &GlowControl::bulbRequest, worker, &BulbWorker::handleRequest);
-    connect(worker, &BulbWorker::done, this, &GlowControl::handleWorkerDone);
+    connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(this, &GlowControl::dispatchJob, worker, &BulbWorker::doJob);
     workerThread.start();
 }
 
@@ -53,47 +49,18 @@ void GlowControl::setListeners(Lightbulb * bulb) {
     connect(bulb, &Lightbulb::requestSetProperty, this, &GlowControl::bulbRequestsSetProperty);
 }
 
-// bool GlowControl::discover() {
-//     if (m_discovering) {
-//         return false;
-//     } else {
-//         m_discovering = true;
-//         emit discoveringChanged(m_discovering);
-//         emit discoverRequest();
-//         return true;
-//     }
-// }
-
 void GlowControl::bulbRequestsSetProperty(const QString &key, const QVariant &value) {
     Lightbulb* bulb = qobject_cast<Lightbulb *>(QObject::sender());
     if (key == QStringLiteral("Label")) {
         // TODO: implement
     } else if (key == QStringLiteral("Power")) {
-        emit bulbRequest(QStringLiteral("power"), value.toBool(), bulb->header);
+        emit dispatchJob(QStringLiteral("power"), value.toBool(), bulb->header);
     } else if (key == QStringLiteral("Color")) {
         // TODO: implement
     } else if (key == QStringLiteral("Brightness")) {
-        emit bulbRequest(QString("brightness"), value.toInt(), bulb->header, false);
+        emit dispatchJob(QStringLiteral("brightness"), value.toInt(), bulb->header);
     }
 }
-
-// bool GlowControl::discovering() {
-//     return m_discovering;
-// }
-
-// void GlowControl::handleDiscoveryEnded(const bool success) {
-//     m_discovering = false;
-//     emit discoveringChanged(m_discovering);
-// }
-
-// void GlowControl::handleBulbTalkback(const QString &label, const bool power, const QVariant &color, const lifx::Header &header) {
-//     Lightbulb* bulb = m_name_to_bulb[label];
-//     bulb->lifxSetsProperty("Label", QVariant(label));
-//     bulb->lifxSetsProperty("Power", QVariant(power));
-//     QMap<QString, QVariant> colorMap = color.toMap();
-//     bulb->lifxSetsProperty("Color", color);
-//     bulb->lifxSetsProperty("Brightness", colorMap["brightness"]);
-// }
 
 bool sort(Lightbulb* a, Lightbulb* b) {
     return a->label() < b->label();
@@ -110,9 +77,9 @@ void GlowControl::handleBulb(const QString &label, const bool power, const QVari
         bulb = new Lightbulb(this, header);
         setListeners(bulb);
         m_name_to_bulb.insert(label, bulb);
-
+        bulb->lifxSetsProperty("Label", QVariant(label));
         m_bulbs.append(bulb);
-        std::sort(m_bulbs.begin(), m_bulbs.end(), sort);
+        std::stable_sort(m_bulbs.begin(), m_bulbs.end(), sort);
         Q_EMIT bulbsChanged();
         qDebug() << "GlowControl, saw new bulb:" << label;
     } else {
@@ -124,13 +91,6 @@ void GlowControl::handleBulb(const QString &label, const bool power, const QVari
     QMap<QString, QVariant> colorMap = color.toMap();
     bulb->lifxSetsProperty("Color", color);
     bulb->lifxSetsProperty("Brightness", colorMap["brightness"]);
-
-}
-
-void GlowControl::handleWorkerDone(const lifx::Header &header, const bool talkback) {
-    if (talkback) {
-        emit stateRequest(header);
-    }
 }
 
 GlowControl::~GlowControl() {
@@ -139,4 +99,5 @@ GlowControl::~GlowControl() {
     trackerThread.wait();
     workerThread.quit();
     workerThread.wait();
+    qDeleteAll(m_bulbs);
 }
