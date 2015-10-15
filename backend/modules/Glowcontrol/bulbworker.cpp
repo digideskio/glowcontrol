@@ -55,6 +55,24 @@ void BulbWorker::doJob(const QString &type, const QVariant &arg, const lifx::Hea
         lifx::message::light::SetColor colorMsg {};
         colorMsg.color.brightness = brightness;
         m_client.Send<lifx::message::light::SetColor>(colorMsg, mac_address.data());
+    } else if (type == "color") {
+
+        // What do we have here?
+        switch (arg.type()) {
+            case QMetaType::QVariantMap: {
+                lifx::message::light::SetColor colorMsg {};
+                QVariantMap m = arg.toMap();
+                colorMsg.color.hue = m["hue"].toInt();
+                colorMsg.color.saturation = m["saturation"].toInt();
+                colorMsg.color.brightness = m["brightness"].toInt();
+                colorMsg.color.kelvin = m["kelvin"].toInt();
+                m_client.Send<lifx::message::light::SetColor>(colorMsg, mac_address.data());
+                break;
+            }
+            default:
+                qDebug() << "dunno what we got" << arg;
+                break;
+        }
     }
 
     while (m_client.WaitingToSend()) {

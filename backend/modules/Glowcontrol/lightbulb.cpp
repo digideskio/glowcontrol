@@ -75,9 +75,18 @@ QVariant Lightbulb::color() {
 }
 
 void Lightbulb::setColor(const QVariant &color) {
-    if (getProperty("Color") != color) {
-        setProperty("Color", color);
+    QVariantMap newColor = color.toMap();
+    QVariantMap oldColor = getProperty("Color").toMap();
+    QVariantMap result;
+
+    std::vector<QString> keys { "hue", "brightness", "kelvin", "saturation" };
+
+    for (int i = 0; i < keys.size(); ++i) {
+        QString key = keys.at(i);
+        result[key] = QVariant(newColor.value(key, oldColor.value(key, 0)));
     }
+
+    setProperty("Color", result);
 }
 
 int Lightbulb::brightness() {

@@ -137,6 +137,11 @@ Item {
             width: bulbRoot.width
         }
 
+        Connections {
+            target: extrasLoader.item
+            onColorSelected: bulb.color = color
+        }
+
     }
 
     Column {

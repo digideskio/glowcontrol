@@ -28,26 +28,22 @@ THE SOFTWARE.
 #include <QtAlgorithms>
 #include <QtDebug>
 
-#include <lib-lifx/lifx_messages.h>
-
 class LifxHelper : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(LifxHelper)
     Q_PROPERTY(QStringList colors READ colorList CONSTANT)
+
     LifxHelper() {
 
-
-        QMap<QString, int> m_hues{{
-            { "red", 62978 },
-            { "orange", 5525 },
-            { "yellow", 7615 },
-            { "green", 16173 },
-            { "cyan", 29814 },
-            { "blue", 43634 },
-            { "purple", 50486 },
-            { "pink", 58275 }
-        }};
+        m_hues.insert("red", 62978);
+        m_hues.insert("orange", 5525);
+        m_hues.insert("yellow", 7615);
+        m_hues.insert("green", 16173);
+        m_hues.insert("cyan", 29814);
+        m_hues.insert("blue", 43634);
+        m_hues.insert("purple", 50486);
+        m_hues.insert("pink", 58275);
 
         for(QString e : m_hues.keys()) {
             m_colorList.append(e);
@@ -61,15 +57,17 @@ public:
         return m_colorList;
     }
 
-    Q_INVOKABLE lifx::HSBK colorToHSKB(const QString &color) {
+    Q_INVOKABLE QVariantMap colorToHSKB(const QString &color) {
         return toHSKB(color, 65535);
     }
 
-    Q_INVOKABLE lifx::HSBK colorToHSKB(const QString &color, const int &saturation) {
+    Q_INVOKABLE QVariantMap colorToHSKB(const QString &color, const int &saturation) {
+        qDebug() << "int saturation" << saturation;
         return toHSKB(color, saturation);
     }
 
-    Q_INVOKABLE lifx::HSBK colorToHSKB(const QString &color, const double &saturation) {
+    Q_INVOKABLE QVariantMap colorToHSKB(const QString &color, const double &saturation) {
+        qDebug() << "double saturation" << saturation;
         return toHSKB(color, (int)(65535 * saturation));
     }
 
@@ -83,10 +81,11 @@ public:
 
 private:
 
-    lifx::HSBK toHSKB(const QString &color, const int &saturation) {
-        lifx::HSBK c;
-        c.hue = m_hues[color];
-        c.saturation = saturation;
+    QVariantMap toHSKB(const QString &color, const int &saturation) {
+        qDebug() << color << saturation;
+        QVariantMap c;
+        c["hue"] = QVariant(m_hues[color]);
+        c["saturation"] = QVariant(saturation);
         return c;
     };
 

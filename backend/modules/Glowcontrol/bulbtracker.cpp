@@ -127,7 +127,7 @@ void BulbTracker::registerCallbacks() {
                         // double bri = double(msg.color.brightness-0) / double(65535-0);
                         // double kel = 1.0;
 
-                        QMap<QString, QVariant> color;
+                        QVariantMap color;
                         color["hue"] = QVariant(msg.color.hue);
                         color["saturation"] = QVariant(msg.color.saturation);
                         color["brightness"] = QVariant(msg.color.brightness);

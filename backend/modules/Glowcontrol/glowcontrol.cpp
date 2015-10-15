@@ -39,7 +39,7 @@ void GlowControl::bulbRequestsSetProperty(const QString &key, const QVariant &va
     } else if (key == QStringLiteral("Power")) {
         emit dispatchJob(QStringLiteral("power"), value.toBool(), bulb->header);
     } else if (key == QStringLiteral("Color")) {
-        // TODO: implement
+        emit dispatchJob(QStringLiteral("color"), value, bulb->header);
     } else if (key == QStringLiteral("Brightness")) {
         emit dispatchJob(QStringLiteral("brightness"), value.toInt(), bulb->header);
     }
