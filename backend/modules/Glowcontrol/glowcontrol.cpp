@@ -5,23 +5,6 @@
 #include "glowcontrol.h"
 
 class Lightbulb;
-// qRegisterMetaType<Lightbulb>("Lightbulb");
-
-std::unordered_map<std::string, lifx::HSBK> colors =
-{
-  { "red", { 62978, 65535, 65535, 3500 }},
-  { "orange", { 5525, 65535, 65535, 3500 }},
-  { "yellow", { 7615, 65535, 65535, 3500 } },
-  { "green", { 16173, 65535, 65535, 3500 } },
-  { "cyan", { 29814, 65535, 65535, 3500 } },
-  { "blue", { 43634, 65535, 65535, 3500 } },
-  { "purple", { 50486, 65535, 65535, 3500 } },
-  { "pink", { 58275, 65535, 47142, 3500 } },
-  { "white", { 58275, 0, 65535, 5500 } },
-  { "cold_white", { 58275, 0, 65535, 9000 } },
-  { "warm_white", { 58275, 0, 65535, 3200 } },
-  { "gold", { 58275, 0, 65535, 2500 } },
-};
 
 GlowControl::GlowControl(QObject *parent) :
         QObject(parent)

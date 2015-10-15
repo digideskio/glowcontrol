@@ -5,6 +5,19 @@ import Ubuntu.Components.ListItems 1.2 as ListItem
 Item {
     id: bulbRoot
     property var bulb: null
+    property bool showingExtras: false
+    height: showingExtras ? units.gu(30) : units.gu(10)
+
+    Behavior on height {
+        NumberAnimation { duration: UbuntuAnimation.FastDuration }
+    }
+
+    function toggleExtras () {
+        if (extrasLoader.status !== Loader.Ready) {
+            extrasLoader.setSource("BulbMore.qml");
+        }
+        showingExtras = !showingExtras;
+    }
 
     Row {
         id: bulbRow
@@ -14,7 +27,7 @@ Item {
         }
 
         width: root.width
-        height: bulbRoot.height - more.height
+        height: units.gu(10) - more.height
 
         Rectangle {
             color: "#fafafa"
@@ -64,7 +77,6 @@ Item {
             }
         }
 
-
         Rectangle {
             color: "#fafafa"
             width: 2 * parent.blocks
@@ -102,12 +114,40 @@ Item {
     }
 
     Column {
-        id: more
+        id: extras
+        height: bulbRoot.showingExtras ? bulbRoot.height - bulbRow.height - more.height : 0
+        opacity: bulbRoot.showingExtras ? 1 : 0
+
         anchors {
             left: parent.left
             right: parent.right
             top: bulbRow.bottom
         }
+
+        Behavior on height {
+            NumberAnimation { duration: UbuntuAnimation.FastDuration }
+        }
+
+        Behavior on opacity {
+            NumberAnimation { duration: UbuntuAnimation.FastDuration }
+        }
+
+        Loader {
+            id: extrasLoader
+            width: bulbRoot.width
+        }
+
+    }
+
+    Column {
+        id: more
+
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: bulbRoot.bottom
+        }
+
         height: units.gu(4)
 
         ListItem.ThinDivider {
@@ -124,10 +164,11 @@ Item {
             Icon {
                 width: units.gu(2)
                 anchors.centerIn: parent
-                name: 'go-down'
+                name: bulbRoot.showingExtras ? 'go-up' : 'go-down'
             }
-            onClicked: console.log('Clicked more...')
+            onClicked: bulbRoot.toggleExtras()
         }
+
         ListItem.Divider {
             id: moreAfter
         }

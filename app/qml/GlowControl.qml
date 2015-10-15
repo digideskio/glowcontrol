@@ -49,7 +49,6 @@ MainView {
 
                     BulbControl {
                         bulb: modelData
-                        height: units.gu(10)
                         width: root.width
                     }
 

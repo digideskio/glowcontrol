@@ -2,5 +2,6 @@
 <qresource>
     <file>qml/GlowControl.qml</file>
     <file>qml/BulbControl.qml</file>
+    <file>qml/BulbMore.qml</file>
 </qresource>
 </RCC>

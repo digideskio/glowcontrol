@@ -11,6 +11,7 @@ Liblifx_SRCS
 
 set(
     Glowcontrolbackend_SRCS
+    modules/Glowcontrol/lifxhelper.h
     modules/Glowcontrol/lifxobject.cpp
     modules/Glowcontrol/lightbulb.cpp
     modules/Glowcontrol/bulbtracker.cpp

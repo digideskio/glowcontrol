@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include <QtQml/QQmlContext>
 
 #include "backend.h"
+#include "lifxhelper.h"
 #include "lightbulb.h"
 #include "glowcontrol.h"
 
@@ -34,6 +35,7 @@ void BackendPlugin::registerTypes(const char *uri)
 
     qmlRegisterType<GlowControl>(uri, 1, 0, "GlowControl");
     qmlRegisterUncreatableType<Lightbulb,1>(uri, 1, 0, "Lightbulb", "Lightbulbs should not be created directly.");
+    qmlRegisterSingletonType<LifxHelper>(uri, 1, 0, "LifxHelper", &LifxHelper::qmlInstance);
 }
 
 void BackendPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
