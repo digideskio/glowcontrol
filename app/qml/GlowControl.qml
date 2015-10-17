@@ -29,6 +29,16 @@ MainView {
         id: root
         title: i18n.tr("GlowControl for LIFX®")
 
+        Connections {
+            target: Qt.application
+            onActiveChanged:
+                if (Qt.application.active) {
+                    glowcontrol.gainApplicationFocus();
+                } else {
+                    glowcontrol.loseApplicationFocus();
+                }
+        }
+
         GlowControl {
             id: glowcontrol
         }
@@ -43,12 +53,12 @@ MainView {
                 id: contentItem
 
                 Repeater {
-                    id: dang
+                    id: bulbs
                     model: glowcontrol.bulbs
                     width: root.width
 
                     BulbControl {
-                        bulb: modelData
+                        bulb: lifxbulb
                         width: root.width
                     }
 
@@ -72,7 +82,7 @@ MainView {
                     fill: parent
                     centerIn: parent
                 }
-                visible: glowcontrol.bulbs.length === 0
+                visible: !bulbs.count
                 text: i18n.tr("No LIFX® bulbs found.")
                 horizontalAlignment: Text.AlignHCenter
                 fontSize: "large"

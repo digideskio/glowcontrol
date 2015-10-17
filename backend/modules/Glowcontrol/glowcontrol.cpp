@@ -7,7 +7,8 @@
 class Lightbulb;
 
 GlowControl::GlowControl(QObject *parent) :
-        QObject(parent)
+        QObject(parent),
+        m_bulbs(this)
 {
     qRegisterMetaType<lifx::Header>("lifx::Header");
 
@@ -26,6 +27,18 @@ GlowControl::GlowControl(QObject *parent) :
     connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
     connect(this, &GlowControl::dispatchJob, worker, &BulbWorker::doJob);
     workerThread.start();
+}
+
+BulbModel* GlowControl::bulbs() {
+    return &m_bulbs;
+}
+
+void GlowControl::loseApplicationFocus() {
+    requestTrackerStop();
+}
+
+void GlowControl::gainApplicationFocus() {
+    requestTrackerStart();
 }
 
 void GlowControl::setListeners(Lightbulb * bulb) {
@@ -61,9 +74,7 @@ void GlowControl::handleBulb(const QString &label, const bool power, const QVari
         setListeners(bulb);
         m_name_to_bulb.insert(label, bulb);
         bulb->lifxSetsProperty("Label", QVariant(label));
-        m_bulbs.append(bulb);
-        std::stable_sort(m_bulbs.begin(), m_bulbs.end(), sort);
-        Q_EMIT bulbsChanged();
+        m_bulbs.addBulb(bulb);
         qDebug() << "GlowControl, saw new bulb:" << label;
     } else {
         bulb = m_name_to_bulb[label];
@@ -82,5 +93,4 @@ GlowControl::~GlowControl() {
     trackerThread.wait();
     workerThread.quit();
     workerThread.wait();
-    qDeleteAll(m_bulbs);
 }

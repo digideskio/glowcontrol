@@ -20,50 +20,37 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-Glow control is the controller. It dispatches jobs (power up/down, brightness n, etc)
-to the worker and starts/stops the tracker.
 */
+#ifndef BULBMODEL_H
+#define BULBMODEL_H
 
-#ifndef GLOWCONTROL_H
-#define GLOWCONTROL_H
+#include <QAbstractListModel>
 
-#include <QObject>
-#include <QThread>
-#include <QQmlListProperty>
-#include <lib-lifx/lifx.h>
-
-#include "bulbtracker.h"
-#include "bulbworker.h"
-#include "bulbmodel.h"
 #include "lightbulb.h"
 
-class GlowControl : public QObject
+class BulbModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(BulbModel* bulbs READ bulbs CONSTANT)
-    QThread trackerThread;
-    QThread workerThread;
-
 public:
-    explicit GlowControl(QObject *parent = 0);
-    ~GlowControl();
-    BulbModel* bulbs();
-    Q_INVOKABLE void loseApplicationFocus();
-    Q_INVOKABLE void gainApplicationFocus();
+    enum BulbRoles {
+        BulbRole = Qt::UserRole + 1,
+        GroupRole
+    };
 
-Q_SIGNALS:
-    void requestTrackerStart();
-    void requestTrackerStop();
-    void dispatchJob(const QString &type, const QVariant &arg, const lifx::Header &header);
+    BulbModel(QObject *parent = 0);
+    ~BulbModel();
 
-public slots:
-    void handleBulb(const QString &label, const bool power, const QVariant &color, const lifx::Header &header);
-    void bulbRequestsSetProperty(const QString &key, const QVariant &value);
+    void addBulb(Lightbulb* bulb);
+
+    int rowCount(const QModelIndex & parent = QModelIndex()) const;
+
+    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+
+protected:
+    QHash<int, QByteArray> roleNames() const;
 
 private:
-    void setListeners(Lightbulb * bulb);
-    QMap<QString, Lightbulb *> m_name_to_bulb;
-    BulbModel m_bulbs;
+    QList<Lightbulb*> m_bulbs;
 };
 
-#endif // GLOWCONTROL_H
+#endif // BULBMODEL_H

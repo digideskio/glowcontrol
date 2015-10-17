@@ -14,6 +14,7 @@ set(
     modules/Glowcontrol/lifxhelper.h
     modules/Glowcontrol/lifxobject.cpp
     modules/Glowcontrol/lightbulb.cpp
+    modules/Glowcontrol/bulbmodel.cpp
     modules/Glowcontrol/bulbtracker.cpp
     modules/Glowcontrol/bulbworker.cpp
     modules/Glowcontrol/glowcontrol.cpp
