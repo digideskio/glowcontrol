@@ -98,6 +98,7 @@ MainView {
                         left: parent.left
                         right: parent.right
                     }
+                    wrapMode: Text.Wrap
                     visible: !bulbs.count
                     text: i18n.tr("No LIFX® bulbs found.")
                     horizontalAlignment: Text.AlignHCenter
@@ -114,6 +115,8 @@ MainView {
                     height: units.gu(10)
 
                     Label {
+                        width: parent.width
+                        wrapMode: Text.Wrap
                         opacity: 0.75
                         anchors.centerIn: parent
                         text: i18n.tr(
