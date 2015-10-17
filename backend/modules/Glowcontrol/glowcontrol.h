@@ -37,10 +37,13 @@ to the worker and starts/stops the tracker.
 #include "bulbmodel.h"
 #include "lightbulb.h"
 
+#define GLOWCONTROL_VERSION "0.1";
+
 class GlowControl : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(BulbModel* bulbs READ bulbs CONSTANT)
+    Q_PROPERTY(QString version READ version CONSTANT)
     QThread trackerThread;
     QThread workerThread;
 
@@ -50,6 +53,7 @@ public:
     BulbModel* bulbs();
     Q_INVOKABLE void loseApplicationFocus();
     Q_INVOKABLE void gainApplicationFocus();
+    QString version() { return GLOWCONTROL_VERSION; }
 
 Q_SIGNALS:
     void requestTrackerStart();

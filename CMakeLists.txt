@@ -17,8 +17,8 @@ include(GNUInstallDirs)
 # Automatically create moc files
 set(CMAKE_AUTOMOC ON)
 
-set(APP_NAME          GlowControl)
-set(APP_ID            "com.ubuntu.developer.jonas-drange")
+set(APP_NAME          glowcontrol)
+set(APP_ID            "glowcontrol")
 #set(GLOWCONTROL_DIR   "share/qml/GlowControl")
 set(MAIN_QML          "GlowControl.qml")
 set(ICON              "GlowControl.png")
@@ -27,7 +27,7 @@ set(DESKTOP_FILE_NAME "glowcontrol.desktop")
 set(LIB_DIR           "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 set(SHARE_DIR         "share/GlowControl")
 set(LOCALE_DIR        "${LOCALEDIR}")
-
+execute_process(COMMAND git rev-parse --verify HEAD OUTPUT_VARIABLE BUILD_REV)
 
 # Components PATH
 execute_process(

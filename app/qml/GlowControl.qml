@@ -52,6 +52,24 @@ MainView {
             Column {
                 id: contentItem
 
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+
+                add: Transition {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: UbuntuAnimation.FastDuration }
+                    NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: UbuntuAnimation.FastDuration }
+                }
+
+                 move: Transition {
+                        NumberAnimation { properties: "x,y"; duration: UbuntuAnimation.FastDuration; easing.type: Easing.OutBounce }
+
+                        // ensure opacity and scale values return to 1.0
+                        NumberAnimation { property: "opacity"; to: 1.0 }
+                        NumberAnimation { property: "scale"; to: 1.0 }
+                    }
+
                 Repeater {
                     id: bulbs
                     model: glowcontrol.bulbs
@@ -75,18 +93,37 @@ MainView {
                     // }
                 }
 
+                Label {
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+                    visible: !bulbs.count
+                    text: i18n.tr("No LIFX® bulbs found.")
+                    horizontalAlignment: Text.AlignHCenter
+                    fontSize: "large"
+                }
+
+
+                Item {
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+
+                    height: units.gu(10)
+
+                    Label {
+                        opacity: 0.75
+                        anchors.centerIn: parent
+                        text: i18n.tr(
+                            "GlowControl for LIFX® v%1. © Jonas Grønås Drange."
+                        ).arg(glowcontrol.version)
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                }
             }
 
-            Label {
-                anchors {
-                    fill: parent
-                    centerIn: parent
-                }
-                visible: !bulbs.count
-                text: i18n.tr("No LIFX® bulbs found.")
-                horizontalAlignment: Text.AlignHCenter
-                fontSize: "large"
-            }
 
             // boundsBehavior: (contentHeight > root.height) ?
             //                  Flickable.DragAndOvershootBounds :
