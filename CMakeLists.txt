@@ -29,6 +29,11 @@ set(SHARE_DIR         "share/GlowControl")
 set(LOCALE_DIR        "${LOCALEDIR}")
 execute_process(COMMAND git rev-parse --verify HEAD OUTPUT_VARIABLE BUILD_REV)
 
+# TODO: improve this.
+execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/retversion ${CMAKE_CURRENT_SOURCE_DIR}/backend/modules/Glowcontrol/glowcontrol.h OUTPUT_VARIABLE VERSION)
+string(REPLACE "\n" "" VERSION ${VERSION})
+MESSAGE(STATUS "Using version " ${VERSION})
+
 # Components PATH
 execute_process(
     COMMAND dpkg-architecture -qDEB_HOST_MULTIARCH

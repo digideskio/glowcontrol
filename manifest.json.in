@@ -9,9 +9,7 @@
             "desktop":  "glowcontrol.desktop"
         }
     },
-    "version": "0.2",
+    "version": "@VERSION@",
     "maintainer": "Jonas G. Drange <jonas@drange.net>",
     "framework" : "ubuntu-sdk-15.04"
 }
-
-

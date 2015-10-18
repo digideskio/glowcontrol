@@ -4,7 +4,7 @@ GlowControl is a super simple Ubuntu Touch app for LIFX®.
 
 ## Installation
 
-Get it soon from the Ubuntu (click) store.
+Get it from the Ubuntu (Click) App store.
 
 ## Usage
 
