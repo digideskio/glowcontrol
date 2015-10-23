@@ -49,13 +49,7 @@ void BulbWorker::doJob(const QString &type, const QVariant &arg, const lifx::Hea
         } else {
             m_client.Send<lifx::message::device::SetPower>(mac_address.data());
         }
-    } else if (type == "brightness") {
-        int brightness = arg.toInt();
-
-        lifx::message::light::SetColor colorMsg {};
-        colorMsg.color.brightness = brightness;
-        m_client.Send<lifx::message::light::SetColor>(colorMsg, mac_address.data());
-    } else if (type == "color") {
+    } else if (type == "color" or type == "brightness") {
 
         // What do we have here?
         switch (arg.type()) {

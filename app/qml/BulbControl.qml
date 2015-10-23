@@ -60,11 +60,11 @@ Item {
                 }
 
                 function formatValue(v) {
-                    return (v / 65535).toFixed(2);
+                    return v.toFixed(2);
                 }
 
                 minimumValue: 0
-                maximumValue: 65535
+                maximumValue: 1
                 value: bulb.brightness
                 live: true
 

@@ -37,7 +37,7 @@ to the worker and starts/stops the tracker.
 #include "bulbmodel.h"
 #include "lightbulb.h"
 
-#define GLOWCONTROL_VERSION "0.2";
+#define GLOWCONTROL_VERSION "0.3";
 
 class GlowControl : public QObject
 {

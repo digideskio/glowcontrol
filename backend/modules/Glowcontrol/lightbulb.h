@@ -41,7 +41,7 @@ class Lightbulb : public LifxObject
     Q_PROPERTY( QString group READ group WRITE setGroup NOTIFY groupChanged )
     Q_PROPERTY( bool power READ power WRITE setPower NOTIFY powerChanged )
     Q_PROPERTY( QVariant color READ color WRITE setColor NOTIFY colorChanged )
-    Q_PROPERTY( int brightness READ brightness WRITE setBrightness NOTIFY brightnessChanged )
+    Q_PROPERTY( double brightness READ brightness WRITE setBrightness NOTIFY brightnessChanged )
     // Q_PROPERTY( QString mac READ mac NOTIFY macChanged )
     Q_PROPERTY( QString version READ version NOTIFY versionChanged )
 public:
@@ -60,8 +60,8 @@ public:
     QVariant color();
     void setColor(const QVariant &color);
 
-    int brightness();
-    void setBrightness(const int &brightness);
+    double brightness();
+    void setBrightness(const double &brightness);
 
     lifx::Header header;
 
@@ -78,6 +78,9 @@ protected:
 
 private:
     void setMac(QString mac);
+
+    double normalizeBrightness(int brightness);
+    int deNormalizeBrightness(double brightness);
 
     QString m_label;
     QString m_group;
@@ -96,7 +99,7 @@ signals:
     void groupChanged(const QString &group);
     void powerChanged(const bool power);
     void colorChanged(const QVariant &color);
-    void brightnessChanged(const int &brightness);
+    void brightnessChanged(const double &brightness);
     void versionChanged(const QString &version);
 // private:
 //     static uint64_t MacToNum(const uint8_t address[8]);

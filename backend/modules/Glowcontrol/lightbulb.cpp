@@ -22,10 +22,12 @@ THE SOFTWARE.
 */
 
 #include <QtDebug>
+#include <math.h>
 
 #include "lightbulb.h"
 
 #define SUPER LifxObject
+#define MAXLUMEN 65535
 
 Lightbulb::Lightbulb(QObject *parent, lifx::Header header) :
     SUPER(parent),
@@ -89,13 +91,14 @@ void Lightbulb::setColor(const QVariant &color) {
     setProperty("Color", result);
 }
 
-int Lightbulb::brightness() {
-    return getProperty("Brightness").toInt();
+double Lightbulb::brightness() {
+    return normalizeBrightness(getProperty("Brightness").toInt());
 }
 
-void Lightbulb::setBrightness(const int &brightness) {
-    if (getProperty("Brightness").toInt() != brightness) {
-        setProperty("Brightness", QVariant(brightness));
+void Lightbulb::setBrightness(const double &brightness) {
+    int denorm = deNormalizeBrightness(brightness);
+    if (getProperty("Brightness").toInt() != denorm) {
+        setProperty("Brightness", QVariant(denorm));
     }
 }
 
@@ -128,6 +131,16 @@ void Lightbulb::propertyChanged(const QString &key, const QVariant &value) {
     } else if (key == QStringLiteral("Color")) {
         Q_EMIT colorChanged(value);
     } else if (key == QStringLiteral("Brightness")) {
-        Q_EMIT brightnessChanged(value.toInt());
+        Q_EMIT brightnessChanged(normalizeBrightness(value.toInt()));
     }
+}
+
+// int is a number from 0 to 65000-something (max lifx brightness)
+double Lightbulb::normalizeBrightness(int brightness) {
+    return sqrt((double)brightness / MAXLUMEN);
+}
+
+// double is a number from 0 to 1
+int Lightbulb::deNormalizeBrightness(double brightness) {
+    return (brightness * brightness) * MAXLUMEN;
 }
