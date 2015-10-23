@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-23 23:05+0200\n"
+"POT-Creation-Date: 2015-10-23 23:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,12 +30,7 @@ msgstr ""
 msgid "GlowControl for LIFX® v%1. © Jonas Grønås Drange."
 msgstr ""
 
-#: ../build-click/out/share/GlowControl/qml/GlowControl.qml:32
-msgid "LIFX for Ubuntu Tøtsj"
-msgstr ""
-
-#: ../build-click/po/glowcontrol.desktop.in.h:1
 #: ../build/po/glowcontrol.desktop.in.h:1
-#: /home/jonas/Work/Canonical/GlowControl/build/po/glowcontrol.desktop.in.h:1
+#: /home/jonas/Work/Canonical/GlowControl/build-click/po/glowcontrol.desktop.in.h:1
 msgid "GlowControl"
 msgstr ""
