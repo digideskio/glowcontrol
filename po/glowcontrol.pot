@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-24 15:28+0200\n"
+"POT-Creation-Date: 2015-10-24 22:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,37 +17,49 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../app/qml/Bulbs.qml:7
+#: ../app/qml/Bulbs.qml:7 ../build-click/out/share/GlowControl/qml/Bulbs.qml:7
 msgid "GlowControl for LIFX®"
 msgstr ""
 
 #: ../app/qml/Bulbs.qml:62
+#: ../build-click/out/share/GlowControl/qml/Bulbs.qml:62
 msgid "No LIFX® bulbs found."
 msgstr ""
 
-#: ../app/qml/Demo.qml:9 ../app/qml/Settings.qml:26
+#: ../app/qml/Demo.qml:9 ../app/qml/Settings.qml:32
+#: ../build-click/out/share/GlowControl/qml/Demo.qml:9
+#: ../build-click/out/share/GlowControl/qml/Settings.qml:26
 msgid "Demo"
 msgstr ""
 
 #: ../app/qml/Settings.qml:8
+#: ../build-click/out/share/GlowControl/qml/Settings.qml:8
 msgid "Settings"
 msgstr ""
 
 #: ../app/qml/Settings.qml:17
+#: ../build-click/out/share/GlowControl/qml/Settings.qml:17
 msgid "About"
 msgstr ""
 
 #: ../app/qml/Settings.qml:20
+#: ../build-click/out/share/GlowControl/qml/Settings.qml:20
 msgid "Help & Support"
 msgstr ""
 
-#: ../app/qml/Settings.qml:33
+#: ../app/qml/Settings.qml:26 ../app/qml/Thirdparty.qml:7
+msgid "Third party licences"
+msgstr ""
+
+#: ../app/qml/Settings.qml:39
+#: ../build-click/out/share/GlowControl/qml/Settings.qml:33
 #, qt-format
 msgid "GlowControl for LIFX® v%1."
 msgstr ""
 
+#: ../build-click/po/glowcontrol.desktop.in.h:1
 #: ../build-local/po/glowcontrol.desktop.in.h:1
 #: ../build/po/glowcontrol.desktop.in.h:1
-#: /home/jonas/Work/Canonical/GlowControl/build-click/po/glowcontrol.desktop.in.h:1
+#: /home/jonas/Work/Canonical/GlowControl/build-local/po/glowcontrol.desktop.in.h:1
 msgid "GlowControl"
 msgstr ""

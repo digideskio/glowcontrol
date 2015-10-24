@@ -6,5 +6,6 @@
     <file>qml/BulbMore.qml</file>
     <file>qml/Settings.qml</file>
     <file>qml/Demo.qml</file>
+    <file>qml/Thirdparty.qml</file>
 </qresource>
 </RCC>

@@ -23,6 +23,12 @@ Page {
         }
 
         ListItem.Standard {
+            text: i18n.tr("Third party licences")
+            progression: true
+            onClicked: pageStack.push(Qt.resolvedUrl("Thirdparty.qml"))
+        }
+
+        ListItem.Standard {
             text: i18n.tr("Demo")
             progression: true
             onClicked: pageStack.push(Qt.resolvedUrl("Demo.qml"))
