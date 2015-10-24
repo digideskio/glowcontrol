@@ -1,3 +1,3 @@
-build
-build-click
+build*
 CMakeLists.txt.user
+*.sublime-*

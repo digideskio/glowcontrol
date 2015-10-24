@@ -1,6 +1,6 @@
 import QtQuick 2.1
 import QtQuick.Layouts 1.1
-import Ubuntu.Components 1.2
+import Ubuntu.Components 1.3
 import Glowcontrol 1.0
 // import Ubuntu.Components.ListItems 1.2 as ListItem
 
