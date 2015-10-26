@@ -21,7 +21,11 @@ Make sure you're on the same network as your LIFX® bulbs.
 
 ## Build from source
 
-*TODO: List deps*
+Depends on 
+gcc-4.9
+cmake
+ubuntu-ui-toolkit >= 1.2
+qt5
 
 Build it:
 
