@@ -21,11 +21,14 @@ Make sure you're on the same network as your LIFX® bulbs.
 
 ## Build from source
 
-Depends on 
-gcc-4.9
-cmake
-ubuntu-ui-toolkit >= 1.2
-qt5
+Install submodules:
+
+    git submodule update --init --recursive
+
+Build depends on 
+
+    cmake
+    qtbase5-dev qtdeclarative5-dev intltool
 
 Build it:
 
